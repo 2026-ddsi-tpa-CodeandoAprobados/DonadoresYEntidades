@@ -70,6 +70,12 @@
       <artifactId>micrometer-registry-datadog</artifactId>
     </dependency>
 
+    <!-- Micrometer -->
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-micrometer</artifactId>
+    </dependency>
+
     <!-- Existing Dependencies -->
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
