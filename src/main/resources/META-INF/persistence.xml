@@ -1,0 +1,27 @@
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" version="2.2">
+    <persistence-unit name="db" transaction-type="RESOURCE_LOCAL">
+
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <class>ar.edu.utn.dds.k3003.model.Donador</class>
+        <class>ar.edu.utn.dds.k3003.model.NecesidadMaterial</class>
+        <class>ar.edu.utn.dds.k3003.model.Queja</class>
+        <class>ar.edu.utn.dds.k3003.model.EntidadBenefica</class>
+
+        <properties>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://dpg-d84f91naqgkc73ak55og-a.oregon-postgres.render.com/donador?sslmode=require"/>
+
+            <property name="jakarta.persistence.jdbc.user" value="donador_user"/>
+            <property name="jakarta.persistence.jdbc.password" value="NlhGNGIqrVIWNMqgvW3NgOb2qgEAIeYw"/>
+
+            <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+        </properties>
+    </persistence-unit>
+</persistence>
