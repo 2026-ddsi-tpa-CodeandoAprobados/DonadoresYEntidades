@@ -1,4 +1,4 @@
-package ar.edu.utn.dds.k3003.repositories;
+package ar.edu.utn.dds.k3003.repositories.DataMappers;
 
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.NecesidadMaterialDTO;
 import ar.edu.utn.dds.k3003.model.NecesidadMaterial;

@@ -1,13 +1,14 @@
-package ar.edu.utn.dds.k3003.repositories;
+package ar.edu.utn.dds.k3003.repositories.InDataBase;
 
 import ar.edu.utn.dds.k3003.model.EntidadBenefica;
+import ar.edu.utn.dds.k3003.repositories.EntidadesBeneficasRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import lombok.val;
 import java.util.List;
 import java.util.Optional;
 
-public class InDataBaseEntidadesBeneficasRepo implements EntidadesBeneficasRepository{
+public class InDataBaseEntidadesBeneficasRepo implements EntidadesBeneficasRepository {
 
     private EntityManager entityManager;
     private EntityTransaction transaction;
@@ -68,5 +69,17 @@ public class InDataBaseEntidadesBeneficasRepo implements EntidadesBeneficasRepos
     @Override
     public List<EntidadBenefica> todasLasEntidades(){
         return entityManager.createQuery("SELECT e FROM EntidadBenefica e", EntidadBenefica.class).getResultList();
+    }
+
+    @Override
+    public void deleteAll() {
+        try {
+            transaction.begin();
+            this.todasLasEntidades().forEach(x -> entityManager.remove(x));
+            transaction.commit();
+        } catch (RuntimeException e) {
+            if (transaction.isActive()) transaction.rollback();
+            throw e;
+        }
     }
 }

@@ -14,4 +14,6 @@ public interface DonadoresRepository {
   Donador deleteById(String id);
 
   List<Donador> todosLosDonadores();
+
+  void deleteAll();
 }

@@ -5,6 +5,17 @@ import ar.edu.utn.dds.k3003.catedra.fachadas.FachadaDonadoresYEntidades;
 import ar.edu.utn.dds.k3003.catedra.fachadas.FachadaIncentivos;
 import ar.edu.utn.dds.k3003.exceptions.*;
 import ar.edu.utn.dds.k3003.repositories.*;
+import ar.edu.utn.dds.k3003.repositories.DataMappers.DonadoresYEntidadesDataMapper;
+import ar.edu.utn.dds.k3003.repositories.DataMappers.NecesidadMaterialDataMapper;
+import ar.edu.utn.dds.k3003.repositories.DataMappers.QuejaDataMapper;
+import ar.edu.utn.dds.k3003.repositories.InDataBase.InDataBaseDonadoresRepo;
+import ar.edu.utn.dds.k3003.repositories.InDataBase.InDataBaseEntidadesBeneficasRepo;
+import ar.edu.utn.dds.k3003.repositories.InDataBase.InDataBaseNecesidadMaterialRepo;
+import ar.edu.utn.dds.k3003.repositories.InDataBase.InDataBaseQuejasRepo;
+import ar.edu.utn.dds.k3003.repositories.InMemory.InMemoryDonadoresRepo;
+import ar.edu.utn.dds.k3003.repositories.InMemory.InMemoryEntidadesBeneficasRepo;
+import ar.edu.utn.dds.k3003.repositories.InMemory.InMemoryNecesidadMaterialRepo;
+import ar.edu.utn.dds.k3003.repositories.InMemory.InMemoryQuejasRepo;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.transaction.Transactional;
@@ -316,5 +327,13 @@ public class Fachada implements FachadaDonadoresYEntidades {
     @Override
     public void setFachadaIncentivos(FachadaIncentivos fachadaIncentivos) {
         this.fachadaIncentivos = fachadaIncentivos;
+    }
+
+    public void quitarTodosLosDonadores() {
+        this.donadoresRepository.deleteAll();
+    }
+
+    public void quitarTodasLasEntidades() {
+        this.entidadesBeneficasRepository.deleteAll();
     }
 }

@@ -1,12 +1,13 @@
-package ar.edu.utn.dds.k3003.repositories;
+package ar.edu.utn.dds.k3003.repositories.InDataBase;
 
 import ar.edu.utn.dds.k3003.model.Queja;
+import ar.edu.utn.dds.k3003.repositories.QuejasRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import java.util.List;
 import java.util.Optional;
 
-public class InDataBaseQuejasRepo implements QuejasRepository{
+public class InDataBaseQuejasRepo implements QuejasRepository {
 
     private EntityManager entityManager;
     private EntityTransaction transaction;

@@ -1,11 +1,9 @@
-package ar.edu.utn.dds.k3003.repositories;
+package ar.edu.utn.dds.k3003.repositories.InDataBase;
 
 import ar.edu.utn.dds.k3003.model.Donador;
+import ar.edu.utn.dds.k3003.repositories.DonadoresRepository;
 import jakarta.persistence.*;
-import jakarta.transaction.Transactional;
 import lombok.val;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 import java.util.List;
@@ -71,6 +69,18 @@ public class InDataBaseDonadoresRepo implements DonadoresRepository {
   @Override
   public List<Donador> todosLosDonadores() {
     return entityManager.createQuery("SELECT d FROM Donador d", Donador.class).getResultList();
+  }
+
+  @Override
+  public void deleteAll() {
+    try {
+      transaction.begin();
+      this.todosLosDonadores().forEach(x -> entityManager.remove(x));
+      transaction.commit();
+    } catch (RuntimeException e) {
+      if (transaction.isActive()) transaction.rollback();
+      throw e;
+    }
   }
 }
 

@@ -1,13 +1,14 @@
-package ar.edu.utn.dds.k3003.repositories;
+package ar.edu.utn.dds.k3003.repositories.InDataBase;
 
 import ar.edu.utn.dds.k3003.model.NecesidadMaterial;
+import ar.edu.utn.dds.k3003.repositories.NecesidadMaterialRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import lombok.val;
 import java.util.List;
 import java.util.Optional;
 
-public class InDataBaseNecesidadMaterialRepo implements NecesidadMaterialRepository{
+public class InDataBaseNecesidadMaterialRepo implements NecesidadMaterialRepository {
 
     private EntityManager entityManager;
     private EntityTransaction transaction;

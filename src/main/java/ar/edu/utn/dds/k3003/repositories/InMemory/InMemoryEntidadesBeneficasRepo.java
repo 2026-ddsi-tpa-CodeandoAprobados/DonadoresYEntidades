@@ -1,13 +1,14 @@
-package ar.edu.utn.dds.k3003.repositories;
+package ar.edu.utn.dds.k3003.repositories.InMemory;
 
-import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.EntidadBeneficaDTO;
 import ar.edu.utn.dds.k3003.model.*;
+import ar.edu.utn.dds.k3003.repositories.EntidadesBeneficasRepository;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class InMemoryEntidadesBeneficasRepo implements EntidadesBeneficasRepository{
+public class InMemoryEntidadesBeneficasRepo implements EntidadesBeneficasRepository {
     List<EntidadBenefica> entidadesBeneficas;
     private AtomicLong idSecuencial = new AtomicLong(1);
 
@@ -40,5 +41,10 @@ public class InMemoryEntidadesBeneficasRepo implements EntidadesBeneficasReposit
     @Override
     public List<EntidadBenefica> todasLasEntidades(){
         return entidadesBeneficas.stream().toList();
+    }
+
+    @Override
+    public void deleteAll() {
+        this.entidadesBeneficas.clear();
     }
 }

@@ -63,6 +63,12 @@ public class DonadorController {
     return ResponseEntity.noContent().build();
   }
 
+  @DeleteMapping
+  public ResponseEntity<Void> deleteAllDonadores() {
+    this.fachada.quitarTodosLosDonadores();
+    return ResponseEntity.noContent().build();
+  }
+
   @GetMapping("/{donadorID}/estadisticas")
   public ResponseEntity<DonadorStatsDTO> estadisticasDonador(@PathVariable String donadorID) {
     return ResponseEntity.status(HttpStatus.OK).body(this.fachada.estadisticasDonador(donadorID));

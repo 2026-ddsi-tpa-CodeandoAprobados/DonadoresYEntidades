@@ -48,4 +48,10 @@ import java.util.Map;
         public ResponseEntity<EntidadBeneficaDTO> patchEntidad(@PathVariable String entidadID, @RequestBody Map<String,String> requestBody){
             return ResponseEntity.status(HttpStatus.CREATED).body(this.fachada.modificarRazonSocial(entidadID, requestBody.get("razonSocial")));
         }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteAllEntidades() {
+        this.fachada.quitarTodasLasEntidades();
+        return ResponseEntity.noContent().build();
+        }
     }

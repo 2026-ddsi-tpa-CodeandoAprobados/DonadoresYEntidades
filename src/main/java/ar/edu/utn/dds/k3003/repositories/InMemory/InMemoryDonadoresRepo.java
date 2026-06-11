@@ -1,6 +1,7 @@
-package ar.edu.utn.dds.k3003.repositories;
+package ar.edu.utn.dds.k3003.repositories.InMemory;
 
 import ar.edu.utn.dds.k3003.model.Donador;
+import ar.edu.utn.dds.k3003.repositories.DonadoresRepository;
 import lombok.val;
 
 import java.util.ArrayList;
@@ -43,10 +44,14 @@ public class InMemoryDonadoresRepo implements DonadoresRepository {
     return donador.get();
   }
 
-
   @Override
   public List<Donador> todosLosDonadores(){
     return donadores.stream().toList();
+  }
+
+  @Override
+  public void deleteAll() {
+    this.donadores.clear();
   }
 }
 

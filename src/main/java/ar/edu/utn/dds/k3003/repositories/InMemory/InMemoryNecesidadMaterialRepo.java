@@ -1,6 +1,7 @@
-package ar.edu.utn.dds.k3003.repositories;
+package ar.edu.utn.dds.k3003.repositories.InMemory;
 
 import ar.edu.utn.dds.k3003.model.NecesidadMaterial;
+import ar.edu.utn.dds.k3003.repositories.NecesidadMaterialRepository;
 import lombok.val;
 
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class InMemoryNecesidadMaterialRepo implements NecesidadMaterialRepository{
+public class InMemoryNecesidadMaterialRepo implements NecesidadMaterialRepository {
 
     private List<NecesidadMaterial> necesidadMaterials;
     private AtomicLong idSecuencial = new AtomicLong(1);

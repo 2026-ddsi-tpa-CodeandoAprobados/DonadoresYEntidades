@@ -1,14 +1,16 @@
-package ar.edu.utn.dds.k3003.repositories;
+package ar.edu.utn.dds.k3003.repositories.InMemory;
 
 
 import ar.edu.utn.dds.k3003.model.Queja;
+import ar.edu.utn.dds.k3003.repositories.QuejasRepository;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class InMemoryQuejasRepo implements QuejasRepository{
+public class InMemoryQuejasRepo implements QuejasRepository {
 
     private List<Queja> quejas;
 
