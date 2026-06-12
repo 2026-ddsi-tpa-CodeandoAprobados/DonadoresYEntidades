@@ -18,13 +18,13 @@ public class InsentivosClient {
     }
     public List<InsigniaDTO> getInsigniasDeDonador(String donadorID) {
         return restClient.get()
-                .uri("/insignias/donador/{donadorID}", donadorID)
+                .uri("donadores/{donadorID}/insignias", donadorID)
                 .retrieve()
                 .body(new ParameterizedTypeReference<List<InsigniaDTO>>() {});
     }
     public MisionDTO getMisionEnCursoDeDonador(String donadorID) {
         return restClient.get()
-                .uri("/insignias/donador/{donadorID}", donadorID)
+                .uri("donadores/{donadorID}/mision", donadorID)
                 .retrieve()
                 .body(MisionDTO.class);
     }
