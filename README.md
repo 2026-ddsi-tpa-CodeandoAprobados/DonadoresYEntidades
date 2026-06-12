@@ -14,7 +14,7 @@ DonadoresYEntidades
 
 🧩 Link al despliegue en Render
 -
-https://entrega-2-jorgeignaciocondoriaguirre.onrender.com
+https://donadoresyentidades-hxss.onrender.com
 ---
 
 🧩 Link de la especificación de la API
