@@ -20,7 +20,7 @@ public class DonacionClient {
     }
     public ProductoDTO getProducto(String productoID) {
         return restClient.get()
-                .uri("/donaciones/{productoID}", productoID)
+                .uri("/productos/{productoID}", productoID)
                 .retrieve()
                 .body(ProductoDTO.class);
     }
