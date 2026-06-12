@@ -3,6 +3,8 @@ package ar.edu.utn.dds.k3003;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.*;
 import ar.edu.utn.dds.k3003.catedra.fachadas.FachadaDonadoresYEntidades;
 import ar.edu.utn.dds.k3003.catedra.fachadas.FachadaIncentivos;
+import ar.edu.utn.dds.k3003.clients.DonacionClient;
+import ar.edu.utn.dds.k3003.clients.InsentivosClient;
 import ar.edu.utn.dds.k3003.exceptions.*;
 import ar.edu.utn.dds.k3003.repositories.*;
 import ar.edu.utn.dds.k3003.repositories.DataMappers.DonadoresYEntidadesDataMapper;
@@ -25,6 +27,8 @@ import java.util.NoSuchElementException;
 
 public class Fachada implements FachadaDonadoresYEntidades {
     private FachadaIncentivos fachadaIncentivos;
+    private DonacionClient donacionClient = new DonacionClient();
+    private InsentivosClient insentivosClient = new InsentivosClient();
 
     //MAPPERS
     private DonadoresYEntidadesDataMapper donadoresYEntidadesDataMapper = new DonadoresYEntidadesDataMapper();
@@ -92,6 +96,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
             throw new RuntimeException("La queja ya existe");
         }
         buscarDonadorPorID(quejaDTO.donadorID());
+        donacionClient.getDonacion(quejaDTO.donacionID());
 
         val queja = quejaDataMapper.toQueja(quejaDTO);
 
@@ -230,6 +235,8 @@ public class Fachada implements FachadaDonadoresYEntidades {
             throw new RuntimeException("La necesidad ya existe");
         }
         buscarEntidadPorID(necesidadMaterialDTO.entidadID());
+        donacionClient.getProducto(necesidadMaterialDTO.productoSolicitadoID());
+
         val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
         val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
         return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidadMaterialGuardada);
@@ -304,11 +311,11 @@ public class Fachada implements FachadaDonadoresYEntidades {
     List<String> insigniasIds = List.of();
     String misionId = null;
 
-    if (this.fachadaIncentivos != null) {
-        val insignias = this.fachadaIncentivos.getInsigniasDeDonador(donadorID);
+    if (this.insentivosClient != null) {
+        val insignias = this.insentivosClient.getInsigniasDeDonador(donadorID);
         insigniasIds = insignias.stream().map(i -> i.id()).toList();
 
-        val mision = this.fachadaIncentivos.getMisionEnCursoDeDonador(donadorID);
+        val mision = this.insentivosClient.getMisionEnCursoDeDonador(donadorID);
         if (mision != null) {
             misionId = mision.id();
         }
