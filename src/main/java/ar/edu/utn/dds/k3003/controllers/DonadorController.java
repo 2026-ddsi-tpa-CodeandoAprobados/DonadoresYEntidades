@@ -4,7 +4,6 @@ import ar.edu.utn.dds.k3003.Fachada;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.DonadorDTO;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.DonadorStatsDTO;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.EstadoDonadorEnum;
-import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.QuejaDTO;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,16 +71,5 @@ public class DonadorController {
   @GetMapping("/{donadorID}/estadisticas")
   public ResponseEntity<DonadorStatsDTO> estadisticasDonador(@PathVariable String donadorID) {
     return ResponseEntity.status(HttpStatus.OK).body(this.fachada.estadisticasDonador(donadorID));
-  }
-
-  @PostMapping("/{donadorID}/quejas")
-  public ResponseEntity<QuejaDTO> agregarQueja(@RequestBody QuejaDTO quejaDTO) {
-    meterRegistry.counter("api.donadores.quejas.registrada", "origen", "http").increment();
-    return ResponseEntity.status(HttpStatus.CREATED).body(this.fachada.agregarQueja(quejaDTO));
-  }
-
-  @GetMapping("/{donadorID}/quejas")
-  public ResponseEntity<List<QuejaDTO>> obtenerQuejasDe(@PathVariable String donadorID) {
-    return ResponseEntity.status(HttpStatus.OK).body(this.fachada.obtenerQuejasDe(donadorID));
   }
 }

@@ -235,6 +235,8 @@ public class Fachada implements FachadaDonadoresYEntidades {
             throw new RuntimeException("La necesidad ya existe");
         }
         buscarEntidadPorID(necesidadMaterialDTO.entidadID());
+        donacionClient.getProducto(necesidadMaterialDTO.productoSolicitadoID());
+
         val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
         val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
         return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidadMaterialGuardada);
