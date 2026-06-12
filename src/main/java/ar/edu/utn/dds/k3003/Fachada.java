@@ -4,7 +4,7 @@ import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.*;
 import ar.edu.utn.dds.k3003.catedra.fachadas.FachadaDonadoresYEntidades;
 import ar.edu.utn.dds.k3003.catedra.fachadas.FachadaIncentivos;
 import ar.edu.utn.dds.k3003.clients.DonacionClient;
-import ar.edu.utn.dds.k3003.clients.InsentivosClient;
+import ar.edu.utn.dds.k3003.clients.IncentivosClient;
 import ar.edu.utn.dds.k3003.exceptions.*;
 import ar.edu.utn.dds.k3003.repositories.*;
 import ar.edu.utn.dds.k3003.repositories.DataMappers.DonadoresYEntidadesDataMapper;
@@ -28,7 +28,7 @@ import java.util.NoSuchElementException;
 public class Fachada implements FachadaDonadoresYEntidades {
     private FachadaIncentivos fachadaIncentivos;
     private DonacionClient donacionClient = new DonacionClient();
-    private InsentivosClient insentivosClient = new InsentivosClient();
+    private IncentivosClient incentivosClient = new IncentivosClient();
 
     //MAPPERS
     private DonadoresYEntidadesDataMapper donadoresYEntidadesDataMapper = new DonadoresYEntidadesDataMapper();
@@ -311,11 +311,11 @@ public class Fachada implements FachadaDonadoresYEntidades {
     List<String> insigniasIds = List.of();
     String misionId = null;
 
-    if (this.insentivosClient != null) {
-        val insignias = this.insentivosClient.getInsigniasDeDonador(donadorID);
+    if (this.incentivosClient != null) {
+        val insignias = this.incentivosClient.getInsigniasDeDonador(donadorID);
         insigniasIds = insignias.stream().map(i -> i.id()).toList();
 
-        val mision = this.insentivosClient.getMisionEnCursoDeDonador(donadorID);
+        val mision = this.incentivosClient.getMisionEnCursoDeDonador(donadorID);
         if (mision != null) {
             misionId = mision.id();
         }
