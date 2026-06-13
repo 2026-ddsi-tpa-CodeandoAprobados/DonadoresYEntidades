@@ -20,10 +20,10 @@ public class QuejasController {
     }
     @PostMapping
     public ResponseEntity<QuejaDTO> agregarQueja(@RequestBody QuejaDTO quejaDTO) {
-        meterRegistry.counter("api.donadores.quejas.registrada", "origen", "http").increment();
+        meterRegistry.counter("api.quejas.registrada", "origen", "http").increment();
         return ResponseEntity.status(HttpStatus.CREATED).body(this.fachada.agregarQueja(quejaDTO));
     }
-    @GetMapping
+    @GetMapping("/{donadorID}")
     public ResponseEntity<List<QuejaDTO>> getAllQuejasDeUnDonador(@PathVariable String donadorID) {
         return ResponseEntity.status(HttpStatus.OK).body(this.fachada.obtenerQuejasDe(donadorID));
     }
