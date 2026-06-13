@@ -19,7 +19,7 @@ https://donadoresyentidades-hxss.onrender.com
 
 🧩 Link de la especificación de la API
 -
-https://app.swaggerhub.com/apis/utnba/DonadoresYEntidades/1.0.0
+https://app.swaggerhub.com/apis/utnba-e54/DonadoresYEntidades/1.0.0
 ---
 
 ### ⚠️ Importante
