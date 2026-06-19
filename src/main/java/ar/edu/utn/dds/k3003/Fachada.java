@@ -97,6 +97,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
         }
         buscarDonadorPorID(quejaDTO.donadorID());
         donacionClient.getDonacion(quejaDTO.donacionID());
+        donacionClient.postQueja(quejaDTO.donacionID());
 
         val queja = quejaDataMapper.toQueja(quejaDTO);
 

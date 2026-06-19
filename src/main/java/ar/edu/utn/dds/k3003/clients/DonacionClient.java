@@ -1,6 +1,8 @@
 package ar.edu.utn.dds.k3003.clients;
 import ar.edu.utn.dds.k3003.catedra.dtos.donaciones.DonacionDTO;
 import ar.edu.utn.dds.k3003.catedra.dtos.donaciones.ProductoDTO;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
 
 public class DonacionClient {
@@ -23,5 +25,13 @@ public class DonacionClient {
                 .uri("/productos/{productoID}", productoID)
                 .retrieve()
                 .body(ProductoDTO.class);
+    }
+    public void postQueja(String donacionID) {
+        restClient.post()
+                .uri("/donaciones/{donacionID}/queja")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(donacionID)
+                .retrieve()
+                .toBodilessEntity();
     }
 }
