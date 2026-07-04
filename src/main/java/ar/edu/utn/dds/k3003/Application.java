@@ -1,6 +1,6 @@
 package ar.edu.utn.dds.k3003;
 
-import ar.edu.utn.dds.k3003.repositories.*;
+import ar.edu.utn.dds.k3003.service.Fachada;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.hibernate.stat.HibernateMetrics;
 import jakarta.persistence.*;

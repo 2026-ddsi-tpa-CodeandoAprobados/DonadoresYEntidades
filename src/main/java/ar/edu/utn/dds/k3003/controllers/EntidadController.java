@@ -1,6 +1,6 @@
 package ar.edu.utn.dds.k3003.controllers;
 
-import ar.edu.utn.dds.k3003.Fachada;
+import ar.edu.utn.dds.k3003.service.Fachada;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.EntidadBeneficaDTO;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.http.HttpStatus;

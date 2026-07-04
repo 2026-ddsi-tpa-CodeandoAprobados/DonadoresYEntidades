@@ -28,7 +28,7 @@ public class DonacionClient {
     }
     public void postQueja(String donacionID) {
         restClient.post()
-                .uri("/donaciones/{donacionID}/queja")
+                .uri("/donaciones/{donacionID}/queja", donacionID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(donacionID)
                 .retrieve()
