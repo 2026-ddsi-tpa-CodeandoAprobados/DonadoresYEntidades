@@ -1,4 +1,4 @@
-package ar.edu.utn.dds.k3003;
+package ar.edu.utn.dds.k3003.service;
 
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.*;
 import ar.edu.utn.dds.k3003.catedra.fachadas.FachadaDonadoresYEntidades;
@@ -97,6 +97,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
         }
         buscarDonadorPorID(quejaDTO.donadorID());
         donacionClient.getDonacion(quejaDTO.donacionID());
+        donacionClient.postQueja(quejaDTO.donacionID());
 
         val queja = quejaDataMapper.toQueja(quejaDTO);
 
@@ -230,6 +231,9 @@ public class Fachada implements FachadaDonadoresYEntidades {
     public NecesidadMaterialDTO registrarNecesidad(NecesidadMaterialDTO necesidadMaterialDTO) {
         if (necesidadMaterialDTO == null) {
             throw new RuntimeException("La necesidad no puede ser nula");
+        }
+        if (necesidadMaterialDTO.cantidadObjetivo() == null || necesidadMaterialDTO.cantidadObjetivo() <= 0) {
+            throw new RuntimeException("La cantidad objetivo no puede ser nula o negativa");
         }
         if (necesidadMaterialRepository.findById(necesidadMaterialDTO.id()).isPresent()) {
             throw new RuntimeException("La necesidad ya existe");

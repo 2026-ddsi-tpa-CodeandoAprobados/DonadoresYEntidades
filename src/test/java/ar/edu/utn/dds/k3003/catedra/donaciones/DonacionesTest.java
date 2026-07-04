@@ -2,7 +2,7 @@ package ar.edu.utn.dds.k3003.catedra.donaciones;
 
 import static org.mockito.Mockito.*;
 
-import ar.edu.utn.dds.k3003.Fachada;
+import ar.edu.utn.dds.k3003.service.Fachada;
 import ar.edu.utn.dds.k3003.catedra.ClassFinder;
 import ar.edu.utn.dds.k3003.catedra.dtos.donaciones.*;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.DonadorDTO;

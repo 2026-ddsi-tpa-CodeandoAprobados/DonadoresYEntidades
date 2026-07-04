@@ -2,7 +2,7 @@ package ar.edu.utn.dds.k3003.catedra.incentivos;
 
 import static org.mockito.Mockito.*;
 
-import ar.edu.utn.dds.k3003.Fachada;
+import ar.edu.utn.dds.k3003.service.Fachada;
 import ar.edu.utn.dds.k3003.catedra.ClassFinder;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.DonadorDTO;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.EstadoDonadorEnum;
