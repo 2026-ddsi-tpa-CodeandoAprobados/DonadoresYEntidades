@@ -9,10 +9,10 @@
         <class>ar.edu.utn.dds.k3003.model.EntidadBenefica</class>
 
         <properties>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://dpg-d84f91naqgkc73ak55og-a.oregon-postgres.render.com/donador?sslmode=require"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://dpg-d8qpmhp194ac7397hcs0-a.oregon-postgres.render.com/donadores_y_entidades?sslmode=require"/>
 
-            <property name="jakarta.persistence.jdbc.user" value="donador_user"/>
-            <property name="jakarta.persistence.jdbc.password" value="NlhGNGIqrVIWNMqgvW3NgOb2qgEAIeYw"/>
+            <property name="jakarta.persistence.jdbc.user" value="donadores_y_entidades_user"/>
+            <property name="jakarta.persistence.jdbc.password" value="VHvivpTQ0AP97f9PwMXMNeitp9sMDDCj"/>
 
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
 
