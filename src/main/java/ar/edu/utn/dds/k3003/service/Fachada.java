@@ -96,7 +96,11 @@ public class Fachada implements FachadaDonadoresYEntidades {
             throw new RuntimeException("La queja ya existe");
         }
         buscarDonadorPorID(quejaDTO.donadorID());
-        donacionClient.getDonacion(quejaDTO.donacionID());
+        try{
+            donacionClient.getDonacion(quejaDTO.donacionID());
+        } catch (RuntimeException e) {
+            throw new RuntimeException("No existe una donacion con ese ID");
+        }
         donacionClient.postQueja(quejaDTO.donacionID());
 
         val queja = quejaDataMapper.toQueja(quejaDTO);
