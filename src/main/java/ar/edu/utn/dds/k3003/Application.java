@@ -1,10 +1,13 @@
 package ar.edu.utn.dds.k3003;
 
 import ar.edu.utn.dds.k3003.service.Fachada;
+import ar.edu.utn.dds.k3003.tools.DonadoresYEntidadesTools;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.hibernate.stat.HibernateMetrics;
 import jakarta.persistence.*;
 import org.hibernate.SessionFactory;
+import org.springframework.ai.support.ToolCallbacks;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -23,5 +26,9 @@ public class Application {
     EntityManager entityManager = entityManagerFactory.createEntityManager();
     EntityTransaction transaction = entityManager.getTransaction();
     return new Fachada(entityManager, transaction);
+  }
+  @Bean
+  public ToolCallbackProvider registrarToolsMcp(DonadoresYEntidadesTools tools) {
+    return () -> ToolCallbacks.from(tools);
   }
 }
