@@ -4,8 +4,6 @@ import ar.edu.utn.dds.k3003.model.Queja;
 import ar.edu.utn.dds.k3003.repositories.QuejasRepository;
 import jakarta.persistence.EntityManager;
 import lombok.val;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +16,6 @@ public class InDataBaseQuejasRepo implements QuejasRepository {
     }
 
     @Override
-    @Transactional
     public Optional<Queja> findById(String id) {
         if (id == null) {
             return Optional.empty();
@@ -28,7 +25,6 @@ public class InDataBaseQuejasRepo implements QuejasRepository {
     }
 
     @Override
-    @Transactional
     public Queja save(Queja queja) {
         if (queja.getId() == null) {
             entityManager.persist(queja);
@@ -39,7 +35,6 @@ public class InDataBaseQuejasRepo implements QuejasRepository {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Queja> quejasDeUnDonador(String donadorId) {
         String jpql = "SELECT n FROM Queja n WHERE n.donadorID = :donadorID";
         return entityManager.createQuery(jpql, Queja.class)

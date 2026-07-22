@@ -4,8 +4,6 @@ import ar.edu.utn.dds.k3003.model.EntidadBenefica;
 import ar.edu.utn.dds.k3003.repositories.EntidadesBeneficasRepository;
 import jakarta.persistence.EntityManager;
 import lombok.val;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +16,6 @@ public class InDataBaseEntidadesBeneficasRepo implements EntidadesBeneficasRepos
     }
 
     @Override
-    @Transactional
     public Optional<EntidadBenefica> findById(String id) {
         if (id == null) {
             return Optional.empty();
@@ -28,7 +25,6 @@ public class InDataBaseEntidadesBeneficasRepo implements EntidadesBeneficasRepos
     }
 
     @Override
-    @Transactional
     public EntidadBenefica save(EntidadBenefica entidadBenefica) {
         if (entidadBenefica
                 .getId() == null) {
@@ -40,7 +36,6 @@ public class InDataBaseEntidadesBeneficasRepo implements EntidadesBeneficasRepos
     }
 
     @Override
-    @Transactional
     public EntidadBenefica deleteById(String id) {
         var entidadBeneficaOptional = this.findById(id);
         if (entidadBeneficaOptional.isPresent()) {
@@ -52,13 +47,11 @@ public class InDataBaseEntidadesBeneficasRepo implements EntidadesBeneficasRepos
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<EntidadBenefica> todasLasEntidades(){
         return entityManager.createQuery("SELECT e FROM EntidadBenefica e", EntidadBenefica.class).getResultList();
     }
 
     @Override
-    @Transactional
     public void deleteAll() {
         entityManager.createQuery("DELETE FROM EntidadBenefica").executeUpdate();
     }
