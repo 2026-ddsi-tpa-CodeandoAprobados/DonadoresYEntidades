@@ -41,11 +41,11 @@ public class Fachada implements FachadaDonadoresYEntidades {
     private NecesidadMaterialRepository necesidadMaterialRepository;
     private QuejasRepository quejasRepository;
 
-    public Fachada(EntityManager entityManager, EntityTransaction transaction) {
-        this.donadoresRepository = new InDataBaseDonadoresRepo(entityManager,transaction);
-        this.entidadesBeneficasRepository = new InDataBaseEntidadesBeneficasRepo(entityManager,transaction);
-        this.necesidadMaterialRepository = new InDataBaseNecesidadMaterialRepo(entityManager,transaction);
-        this.quejasRepository = new InDataBaseQuejasRepo(entityManager,transaction);
+    public Fachada(EntityManager entityManager) {
+        this.donadoresRepository = new InDataBaseDonadoresRepo(entityManager);
+        this.entidadesBeneficasRepository = new InDataBaseEntidadesBeneficasRepo(entityManager);
+        this.necesidadMaterialRepository = new InDataBaseNecesidadMaterialRepo(entityManager);
+        this.quejasRepository = new InDataBaseQuejasRepo(entityManager);
     }
     public Fachada(){
         this.donadoresRepository = new InMemoryDonadoresRepo();

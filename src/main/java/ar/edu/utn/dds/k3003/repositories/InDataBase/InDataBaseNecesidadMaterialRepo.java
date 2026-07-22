@@ -1,9 +1,11 @@
 package ar.edu.utn.dds.k3003.repositories.InDataBase;
 
+import ar.edu.utn.dds.k3003.model.Donador;
 import ar.edu.utn.dds.k3003.model.NecesidadMaterial;
 import ar.edu.utn.dds.k3003.repositories.NecesidadMaterialRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.val;
 import java.util.List;
 import java.util.Optional;
@@ -11,61 +13,46 @@ import java.util.Optional;
 public class InDataBaseNecesidadMaterialRepo implements NecesidadMaterialRepository {
 
     private EntityManager entityManager;
-    private EntityTransaction transaction;
 
-    public InDataBaseNecesidadMaterialRepo(EntityManager entityManager, EntityTransaction transaction) {
+    public InDataBaseNecesidadMaterialRepo(EntityManager entityManager) {
         this.entityManager = entityManager;
-        this.transaction = transaction;
     }
+
     @Override
+    @Transactional
+    public Optional<NecesidadMaterial> findById(String id){
+        if (id == null) {
+            return Optional.empty();
+        }
+        val necesidadMaterial = entityManager.find(NecesidadMaterial.class, id);
+        return Optional.ofNullable(necesidadMaterial);
+    }
+
+    @Override
+    @Transactional
     public NecesidadMaterial save(NecesidadMaterial necesidadMaterial) {
-        try {
-            transaction.begin();
-            NecesidadMaterial necesidadMaterialGuardada;
-            if (necesidadMaterial.getId() == null) {
-                entityManager.persist(necesidadMaterial);
-                necesidadMaterialGuardada = necesidadMaterial;
-            } else {
-                necesidadMaterialGuardada = entityManager.merge(necesidadMaterial);
-            }
-            transaction.commit();
-            return necesidadMaterialGuardada;
-        } catch (RuntimeException e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
+        if (necesidadMaterial.getId() == null) {
+            entityManager.persist(necesidadMaterial);
+            return necesidadMaterial;
+        } else {
+            return entityManager.merge(necesidadMaterial);
         }
     }
 
     @Override
+    @Transactional
     public NecesidadMaterial deleteById(String id) {
-        val necesidadOptional = this.findById(id);
-        if (necesidadOptional.isPresent()) {
-            NecesidadMaterial necesidadMaterial = necesidadOptional.get();
-            try {
-                transaction.begin();
-                entityManager.remove(necesidadMaterial);
-                transaction.commit();
-                return necesidadMaterial;
-            } catch (RuntimeException e) {
-                if (transaction.isActive()) transaction.rollback();
-                throw e;
-            }
+        var necesidadMaterialOptional = this.findById(id);
+        if (necesidadMaterialOptional.isPresent()) {
+            NecesidadMaterial necesidadMaterial = necesidadMaterialOptional.get();
+            entityManager.remove(necesidadMaterial);
+            return necesidadMaterial;
         }
         return null;
     }
 
     @Override
-    public Optional<NecesidadMaterial> findById(String id){
-        if (id == null) {
-            return Optional.empty();
-        }
-        NecesidadMaterial necesidadMaterial = entityManager.find(NecesidadMaterial.class, id);
-        return Optional.ofNullable(necesidadMaterial);
-    }
-
-    @Override
+    @Transactional
     public List<NecesidadMaterial> todasLasNecesidades(String productoSolicitadoID) {
 
         String jpql = "SELECT n FROM NecesidadMaterial n WHERE n.productoSolicitadoID = :productoId";
@@ -74,6 +61,9 @@ public class InDataBaseNecesidadMaterialRepo implements NecesidadMaterialReposit
                 .setParameter("productoId", productoSolicitadoID)
                 .getResultList();
     }
+
+    @Override
+    @Transactional
     public List<NecesidadMaterial> todasNecesidades(){
         return entityManager.createQuery("SELECT n FROM NecesidadMaterial n", NecesidadMaterial.class).getResultList();
     }

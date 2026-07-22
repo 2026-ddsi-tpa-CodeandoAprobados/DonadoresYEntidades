@@ -3,83 +3,63 @@ package ar.edu.utn.dds.k3003.repositories.InDataBase;
 import ar.edu.utn.dds.k3003.model.EntidadBenefica;
 import ar.edu.utn.dds.k3003.repositories.EntidadesBeneficasRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 import lombok.val;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
 public class InDataBaseEntidadesBeneficasRepo implements EntidadesBeneficasRepository {
 
     private EntityManager entityManager;
-    private EntityTransaction transaction;
 
-    public InDataBaseEntidadesBeneficasRepo(EntityManager entityManager, EntityTransaction transaction) {
+    public InDataBaseEntidadesBeneficasRepo(EntityManager entityManager) {
         this.entityManager = entityManager;
-        this.transaction = transaction;
     }
 
     @Override
+    @Transactional
     public Optional<EntidadBenefica> findById(String id) {
         if (id == null) {
             return Optional.empty();
         }
-        EntidadBenefica entidadBenefica = entityManager.find(EntidadBenefica.class, id);
+        val entidadBenefica = entityManager.find(EntidadBenefica.class, id);
         return Optional.ofNullable(entidadBenefica);
     }
 
     @Override
+    @Transactional
     public EntidadBenefica save(EntidadBenefica entidadBenefica) {
-        try {
-            transaction.begin();
-            EntidadBenefica entidadBeneficaGuardada;
-            if (entidadBenefica.getId() == null) {
-                entityManager.persist(entidadBenefica);
-                entidadBeneficaGuardada = entidadBenefica;
-            } else {
-                entidadBeneficaGuardada = entityManager.merge(entidadBenefica);
-            }
-            transaction.commit();
-            return entidadBeneficaGuardada;
-        } catch (RuntimeException e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
+        if (entidadBenefica
+                .getId() == null) {
+            entityManager.persist(entidadBenefica);
+            return entidadBenefica;
+        } else {
+            return entityManager.merge(entidadBenefica);
         }
     }
 
     @Override
+    @Transactional
     public EntidadBenefica deleteById(String id) {
-        val entidadBeneficaOptional = this.findById(id);
+        var entidadBeneficaOptional = this.findById(id);
         if (entidadBeneficaOptional.isPresent()) {
             EntidadBenefica entidadBenefica = entidadBeneficaOptional.get();
-            try {
-                transaction.begin();
-                entityManager.remove(entidadBenefica);
-                transaction.commit();
-                return entidadBenefica;
-            } catch (RuntimeException e) {
-                if (transaction.isActive()) transaction.rollback();
-                throw e;
-            }
+            entityManager.remove(entidadBenefica);
+            return entidadBenefica;
         }
         return null;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EntidadBenefica> todasLasEntidades(){
         return entityManager.createQuery("SELECT e FROM EntidadBenefica e", EntidadBenefica.class).getResultList();
     }
 
     @Override
+    @Transactional
     public void deleteAll() {
-        try {
-            transaction.begin();
-            this.todasLasEntidades().forEach(x -> entityManager.remove(x));
-            transaction.commit();
-        } catch (RuntimeException e) {
-            if (transaction.isActive()) transaction.rollback();
-            throw e;
-        }
+        entityManager.createQuery("DELETE FROM EntidadBenefica").executeUpdate();
     }
 }

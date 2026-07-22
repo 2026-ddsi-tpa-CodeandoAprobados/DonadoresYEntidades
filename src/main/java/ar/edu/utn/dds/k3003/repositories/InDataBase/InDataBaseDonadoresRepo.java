@@ -4,21 +4,20 @@ import ar.edu.utn.dds.k3003.model.Donador;
 import ar.edu.utn.dds.k3003.repositories.DonadoresRepository;
 import jakarta.persistence.*;
 import lombok.val;
-
 import java.util.Optional;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 public class InDataBaseDonadoresRepo implements DonadoresRepository {
 
   private EntityManager entityManager;
-  private EntityTransaction transaction;
 
-  public InDataBaseDonadoresRepo(EntityManager entityManager, EntityTransaction transaction) {
+  public InDataBaseDonadoresRepo(EntityManager entityManager) {
     this.entityManager = entityManager;
-    this.transaction = transaction;
   }
 
   @Override
+  @Transactional
   public Optional<Donador> findById(String id) {
     if (id == null) {
       return Optional.empty();
@@ -28,59 +27,38 @@ public class InDataBaseDonadoresRepo implements DonadoresRepository {
   }
 
   @Override
+  @Transactional
   public Donador save(Donador donador) {
-    try {
-      transaction.begin();
-      Donador donadorGuardado;
-      if (donador.getId() == null) {
-        entityManager.persist(donador);
-        donadorGuardado = donador;
-      } else {
-        donadorGuardado = entityManager.merge(donador);
-      }
-      transaction.commit();
-      return donadorGuardado;
-    } catch (RuntimeException e) {
-      if (transaction.isActive()) {
-        transaction.rollback();
-      }
-      throw e;
+    if (donador.getId() == null) {
+      entityManager.persist(donador);
+      return donador;
+    } else {
+      return entityManager.merge(donador);
     }
   }
 
   @Override
+  @Transactional
   public Donador deleteById(String id) {
-    val donadorOptional = this.findById(id);
+    var donadorOptional = this.findById(id);
     if (donadorOptional.isPresent()) {
       Donador donador = donadorOptional.get();
-      try {
-        transaction.begin();
-        entityManager.remove(donador);
-        transaction.commit();
-        return donador;
-      } catch (RuntimeException e) {
-        if (transaction.isActive()) transaction.rollback();
-        throw e;
-      }
+      entityManager.remove(donador);
+      return donador;
     }
     return null;
   }
 
   @Override
+  @Transactional(readOnly = true)
   public List<Donador> todosLosDonadores() {
     return entityManager.createQuery("SELECT d FROM Donador d", Donador.class).getResultList();
   }
 
   @Override
+  @Transactional
   public void deleteAll() {
-    try {
-      transaction.begin();
-      this.todosLosDonadores().forEach(x -> entityManager.remove(x));
-      transaction.commit();
-    } catch (RuntimeException e) {
-      if (transaction.isActive()) transaction.rollback();
-      throw e;
-    }
+    entityManager.createQuery("DELETE FROM Donador").executeUpdate();
   }
 }
 
