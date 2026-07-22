@@ -10,7 +10,7 @@ import org.springframework.ai.support.ToolCallbacks;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
@@ -22,7 +22,7 @@ public class Application {
   @Bean
   public Fachada fachada(MeterRegistry meterRegistry) {
     EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("db");
-    HibernateMetrics.monitor(meterRegistry, entityManagerFactory.unwrap(SessionFactory.class), "BaseDeDatosRender");
+    org.hibernate.orm.micrometer.HibernateMetrics.monitor(meterRegistry, entityManagerFactory.unwrap(SessionFactory.class), "BaseDeDatosRender");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
     EntityTransaction transaction = entityManager.getTransaction();
     return new Fachada(entityManager, transaction);
