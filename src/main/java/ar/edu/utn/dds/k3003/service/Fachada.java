@@ -22,13 +22,16 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.transaction.Transactional;
 import lombok.val;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@Component
 public class Fachada implements FachadaDonadoresYEntidades {
     private FachadaIncentivos fachadaIncentivos;
-    private DonacionClient donacionClient = new DonacionClient();
-    private IncentivosClient incentivosClient = new IncentivosClient();
+    private DonacionClient donacionClient;
+    private IncentivosClient incentivosClient;
 
     //MAPPERS
     private DonadoresYEntidadesDataMapper donadoresYEntidadesDataMapper = new DonadoresYEntidadesDataMapper();
@@ -52,6 +55,12 @@ public class Fachada implements FachadaDonadoresYEntidades {
         this.entidadesBeneficasRepository = new InMemoryEntidadesBeneficasRepo();
         this.necesidadMaterialRepository = new InMemoryNecesidadMaterialRepo();
         this.quejasRepository = new InMemoryQuejasRepo();
+    }
+    public Fachada(DonacionClient donacionClient) {
+        this.donacionClient = donacionClient;
+    }
+    public Fachada(IncentivosClient incentivosClient) {
+        this.incentivosClient = incentivosClient;
     }
 
     public List<EntidadBeneficaDTO> obtenerTodasLasEntidades(){
