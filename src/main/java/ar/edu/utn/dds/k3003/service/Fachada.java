@@ -41,11 +41,11 @@ public class Fachada implements FachadaDonadoresYEntidades {
     private NecesidadMaterialRepository necesidadMaterialRepository;
     private QuejasRepository quejasRepository;
 
-    public Fachada(EntityManager entityManager, EntityTransaction transaction) {
-        this.donadoresRepository = new InDataBaseDonadoresRepo(entityManager,transaction);
-        this.entidadesBeneficasRepository = new InDataBaseEntidadesBeneficasRepo(entityManager,transaction);
-        this.necesidadMaterialRepository = new InDataBaseNecesidadMaterialRepo(entityManager,transaction);
-        this.quejasRepository = new InDataBaseQuejasRepo(entityManager,transaction);
+    public Fachada(EntityManager entityManager) {
+        this.donadoresRepository = new InDataBaseDonadoresRepo(entityManager);
+        this.entidadesBeneficasRepository = new InDataBaseEntidadesBeneficasRepo(entityManager);
+        this.necesidadMaterialRepository = new InDataBaseNecesidadMaterialRepo(entityManager);
+        this.quejasRepository = new InDataBaseQuejasRepo(entityManager);
     }
     public Fachada(){
         this.donadoresRepository = new InMemoryDonadoresRepo();
@@ -64,6 +64,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
 
     //ALTA DONADOR
     @Override
+    @Transactional
     public DonadorDTO agregarDonador(DonadorDTO donadorDTO) {
         if (this.donadoresRepository.findById(donadorDTO.id()).isPresent()) {
             throw new DonadorYaExistenteException("Ya existe un donador con ese ID");
@@ -88,6 +89,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
 
     //MODIFICAR DONADOR
     @Override
+    @Transactional
     public QuejaDTO agregarQueja(QuejaDTO quejaDTO) throws NoSuchElementException{
         if (quejaDTO == null) {
             throw new RuntimeException("La queja no puede ser nula");
@@ -119,6 +121,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
 
     //MODIFICAR DONADOR
     @Override
+    @Transactional
     public DonadorDTO modificarEstado(String donadorID, EstadoDonadorEnum estado) throws NoSuchElementException {
         if (estado == null) {
             throw new RuntimeException("El estado no puede ser nulo");
@@ -134,6 +137,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
 
     //MODIFICAR DONADOR
     @Override
+    @Transactional
     public DonadorDTO modifcarCategoria(String donadorID, String categoria) throws NoSuchElementException {
         if (categoria == null) {
             throw new RuntimeException("La categoria no puede ser nula");
@@ -148,6 +152,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
     }
 
     @Override
+    @Transactional
     public DonadorDTO buscarDonadorPorID(String donadorID) throws NoSuchElementException {
         val donadorOptional = this.donadoresRepository.findById(donadorID);
         if (donadorOptional.isEmpty()) {
@@ -159,6 +164,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
     }
 
     @Override
+    @Transactional
     public Boolean puedeDonar(String donadorID) throws NoSuchElementException {
         if (donadorID == null) {
             throw new RuntimeException("No puede donar");
@@ -170,6 +176,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
     }
 
     @Override
+    @Transactional
     public List<QuejaDTO> obtenerQuejasDe(String donadorID) throws NoSuchElementException {
         if (donadorID == null){
             throw new NoSuchElementException("El parametro no puede ser nulo");
@@ -180,6 +187,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
 
     //ALTA ENTIDAD
     @Override
+    @Transactional
     public EntidadBeneficaDTO agregarEntidad(EntidadBeneficaDTO entidadBeneficaDTO) {
         if (entidadBeneficaDTO == null) {
             throw new RuntimeException("La entidad no puede ser nula");
@@ -193,6 +201,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
     }
 
     //BAJA ENTIDAD
+    @Transactional
     public EntidadBeneficaDTO quitarEntidad(String entidadID){
         if (entidadID == null) {
             throw new RuntimeException("La entidadID no puede ser nula");
@@ -207,6 +216,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
     }
 
     //MODIFICAR ENTIDAD
+    @Transactional
     public EntidadBeneficaDTO modificarRazonSocial(String entidadID, String nuevaRazon){
         if(entidadID == null){
             throw new RuntimeException("El parametro entidadID no puede ser nulo");
@@ -219,6 +229,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
 
 
     @Override
+    @Transactional
     public EntidadBeneficaDTO buscarEntidadPorID(String entidadID) throws NoSuchElementException {
         val entidadOptional = this.entidadesBeneficasRepository.findById(entidadID);
 
@@ -232,6 +243,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
 
     //ALTA NECESIDAD MATERIAL
     @Override
+    @Transactional
     public NecesidadMaterialDTO registrarNecesidad(NecesidadMaterialDTO necesidadMaterialDTO) {
         if (necesidadMaterialDTO == null) {
             throw new RuntimeException("La necesidad no puede ser nula");
@@ -255,6 +267,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
     }
 
     //BAJA NECESIDAD MATERIAL
+    @Transactional
     public NecesidadMaterialDTO quitarNecesidad(String necesidadID){
         if(necesidadID == null){
             throw new RuntimeException("La necesidadID no puede ser nula");
@@ -266,6 +279,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
         return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidadBorrada);
     }
 
+    @Transactional
     public NecesidadMaterialDTO buscarNecesidad (String necesidadID){
         val necesidad = necesidadMaterialRepository.findById(necesidadID);
         if(necesidad.isEmpty()){
@@ -281,6 +295,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
 
     //MODIFICA NECESIDAD MATERIAL
     @Override
+    @Transactional
     public NecesidadMaterialDTO satisfacerNecesidad(String necesidadID, Integer cantidad) throws NoSuchElementException {
         if (cantidad == null || cantidad <= 0) {
             throw new RuntimeException("La cantidad debe ser mayor a cero");
@@ -308,6 +323,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
     }
 
     @Override
+    @Transactional
     public List<NecesidadMaterialDTO> obtenerNecesidadesInsatisfechasDe(String productoSolicitadoID) {
         return necesidadMaterialRepository
                 .todasLasNecesidades(productoSolicitadoID)
@@ -316,6 +332,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
     }
 
     @Override
+    @Transactional
     public DonadorStatsDTO estadisticasDonador(String donadorID) throws NoSuchElementException {
 
     val donador = buscarDonadorPorID(donadorID);
@@ -344,14 +361,17 @@ public class Fachada implements FachadaDonadoresYEntidades {
     );
 }
     @Override
+    @Transactional
     public void setFachadaIncentivos(FachadaIncentivos fachadaIncentivos) {
         this.fachadaIncentivos = fachadaIncentivos;
     }
 
+    @Transactional
     public void quitarTodosLosDonadores() {
         this.donadoresRepository.deleteAll();
     }
 
+    @Transactional
     public void quitarTodasLasEntidades() {
         this.entidadesBeneficasRepository.deleteAll();
     }
