@@ -5,6 +5,7 @@ import ar.edu.utn.dds.k3003.tools.DonadoresYEntidadesTools;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.persistence.*;
 import org.hibernate.SessionFactory;
+import org.hibernate.stat.HibernateMetrics;
 import org.springframework.ai.support.ToolCallbacks;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.boot.SpringApplication;
@@ -20,7 +21,7 @@ public class Application {
 
   @Bean
   public Fachada fachada(MeterRegistry meterRegistry, EntityManager entityManager, EntityManagerFactory entityManagerFactory) {
-    org.hibernate.orm.micrometer.HibernateMetrics.monitor(
+    HibernateMetrics.monitor(
             meterRegistry,
             entityManagerFactory.unwrap(SessionFactory.class),
             "BaseDeDatosRender"
