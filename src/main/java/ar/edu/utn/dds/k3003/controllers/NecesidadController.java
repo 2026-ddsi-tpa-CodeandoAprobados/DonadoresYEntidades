@@ -46,7 +46,11 @@ public class NecesidadController {
 
     @PostMapping("/{necesidadID}/satisfaccion")
     public ResponseEntity<NecesidadMaterialDTO> postSatisfacerNecesidad(@PathVariable String necesidadID, @RequestBody Map<String, Integer> requestBody) {
-        Integer cantidad = requestBody.get("cantidad");
-        return ResponseEntity.status(HttpStatus.OK).body(this.fachada.satisfacerNecesidad(necesidadID,cantidad));
+        return ResponseEntity.status(HttpStatus.OK).body(this.fachada.satisfacerNecesidad(necesidadID,requestBody.get("cantidad")));
+    }
+
+    @PatchMapping("/{necesidadID}/cantidad-objetivo")
+    public ResponseEntity<NecesidadMaterialDTO> patchNecesidadMaterial(@PathVariable String necesidadID, @RequestBody Map<String,Integer> requestBody){
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(this.fachada.modificarNecesidad(necesidadID,requestBody.get("cantidadObjetivo")));
     }
 }

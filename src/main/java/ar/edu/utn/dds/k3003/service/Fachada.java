@@ -113,13 +113,13 @@ public class Fachada implements FachadaDonadoresYEntidades {
         }
         buscarDonadorPorID(quejaDTO.donadorID());
 
-        try{
-            if(donacionClient.getDonacion(quejaDTO.donacionID()) != null){
-                donacionClient.postQueja(quejaDTO.donacionID(),quejaDTO.descripcion());
-            }
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Fallo en la conexion con Donaciones");
-        }
+//        try{
+//            if(donacionClient.getDonacion(quejaDTO.donacionID()) != null){
+//                donacionClient.postQueja(quejaDTO.donacionID(),quejaDTO.descripcion());
+//            }
+//        } catch (RuntimeException e) {
+//            throw new RuntimeException("Fallo en la conexion con Donaciones");
+//        }
 
         val queja = quejaDataMapper.toQueja(quejaDTO);
 
@@ -272,19 +272,19 @@ public class Fachada implements FachadaDonadoresYEntidades {
         }
         buscarEntidadPorID(necesidadMaterialDTO.entidadID());
 
-        try{
-            donacionClient.getProducto(necesidadMaterialDTO.productoSolicitadoID());
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Fallo en la conexion con Donaciones");
-        }
-
-        try{
-            if(logisticaClient.strokeDisponible(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialDTO.cantidadObjetivo())){
-                logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialDTO.cantidadObjetivo());
-            }
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Fallo en la conexion con Logistica");
-        }
+//        try{
+//            donacionClient.getProducto(necesidadMaterialDTO.productoSolicitadoID());
+//        } catch (RuntimeException e) {
+//            throw new RuntimeException("Fallo en la conexion con Donaciones");
+//        }
+//
+//        try{
+//            if(logisticaClient.strokeDisponible(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialDTO.cantidadObjetivo())){
+//                logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialDTO.cantidadObjetivo());
+//            }
+//        } catch (RuntimeException e) {
+//            throw new RuntimeException("Fallo en la conexion con Logistica");
+//        }
 
         val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
         val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
@@ -344,6 +344,13 @@ public class Fachada implements FachadaDonadoresYEntidades {
             return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad.get());
         }
         this.necesidadMaterialRepository.save(necesidad.get());
+        return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad.get());
+    }
+
+    @Transactional
+    public NecesidadMaterialDTO modificarNecesidad(String necesidadID, Integer cantidadObjetivo){
+        val necesidad = this.necesidadMaterialRepository.findById(necesidadID);
+        necesidad.get().setCantidadObjetivo(cantidadObjetivo);
         return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad.get());
     }
 
