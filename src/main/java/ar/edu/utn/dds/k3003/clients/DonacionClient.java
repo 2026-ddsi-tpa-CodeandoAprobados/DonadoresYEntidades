@@ -30,11 +30,12 @@ public class DonacionClient {
                 .retrieve()
                 .body(ProductoDTO.class);
     }
-    public void postQueja(String donacionID) {
+    public void postQueja(String donacionID, String descripcion) {
+        DonacionDTO donacion = new DonacionDTO(null,null,null,descripcion,null,null,null);
         restClient.post()
                 .uri("/donaciones/{donacionID}/queja", donacionID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(donacionID)
+                .body(donacion)
                 .retrieve()
                 .toBodilessEntity();
     }

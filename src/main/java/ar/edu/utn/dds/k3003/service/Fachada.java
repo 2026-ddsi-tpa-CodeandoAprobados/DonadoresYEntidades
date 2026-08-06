@@ -5,6 +5,7 @@ import ar.edu.utn.dds.k3003.catedra.fachadas.FachadaDonadoresYEntidades;
 import ar.edu.utn.dds.k3003.catedra.fachadas.FachadaIncentivos;
 import ar.edu.utn.dds.k3003.clients.DonacionClient;
 import ar.edu.utn.dds.k3003.clients.IncentivosClient;
+import ar.edu.utn.dds.k3003.clients.LogisticaClient;
 import ar.edu.utn.dds.k3003.exceptions.*;
 import ar.edu.utn.dds.k3003.repositories.*;
 import ar.edu.utn.dds.k3003.repositories.DataMappers.DonadoresYEntidadesDataMapper;
@@ -32,6 +33,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
     private FachadaIncentivos fachadaIncentivos;
     private DonacionClient donacionClient;
     private IncentivosClient incentivosClient;
+    private LogisticaClient logisticaClient;
 
     //MAPPERS
     private DonadoresYEntidadesDataMapper donadoresYEntidadesDataMapper = new DonadoresYEntidadesDataMapper();
@@ -61,6 +63,9 @@ public class Fachada implements FachadaDonadoresYEntidades {
     }
     public Fachada(IncentivosClient incentivosClient) {
         this.incentivosClient = incentivosClient;
+    }
+    public Fachada(LogisticaClient logisticaClient) {
+        this.logisticaClient = logisticaClient;
     }
 
     public List<EntidadBeneficaDTO> obtenerTodasLasEntidades(){
@@ -107,12 +112,14 @@ public class Fachada implements FachadaDonadoresYEntidades {
             throw new RuntimeException("La queja ya existe");
         }
         buscarDonadorPorID(quejaDTO.donadorID());
-//        try{
-//            donacionClient.getDonacion(quejaDTO.donacionID());
-//        } catch (RuntimeException e) {
-//            throw new RuntimeException("No existe una donacion con ese ID");
-//        }
-        //donacionClient.postQueja(quejaDTO.donacionID());
+
+        try{
+            if(donacionClient.getDonacion(quejaDTO.donacionID()) != null){
+                donacionClient.postQueja(quejaDTO.donacionID(),quejaDTO.descripcion());
+            }
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Fallo en la conexion con Donaciones");
+        }
 
         val queja = quejaDataMapper.toQueja(quejaDTO);
 
@@ -264,10 +271,19 @@ public class Fachada implements FachadaDonadoresYEntidades {
             throw new RuntimeException("La necesidad ya existe");
         }
         buscarEntidadPorID(necesidadMaterialDTO.entidadID());
+
         try{
             donacionClient.getProducto(necesidadMaterialDTO.productoSolicitadoID());
         } catch (RuntimeException e) {
-            throw new RuntimeException("El ID del producto solicitado no existe");
+            throw new RuntimeException("Fallo en la conexion con Donaciones");
+        }
+
+        try{
+            if(logisticaClient.strokeDisponible(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialDTO.cantidadObjetivo())){
+                logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialDTO.cantidadObjetivo());
+            }
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Fallo en la conexion con Logistica");
         }
 
         val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
