@@ -2,17 +2,15 @@ package ar.edu.utn.dds.k3003.clients;
 import ar.edu.utn.dds.k3003.catedra.dtos.donaciones.DonacionDTO;
 import ar.edu.utn.dds.k3003.catedra.dtos.donaciones.ProductoDTO;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 @Service
-public class DonacionClient {
+public class DonacionesClient {
 
     private RestClient restClient;
 
-    public DonacionClient(@Value("${DONACION_API_URL}") String baseUrl) {
+    public DonacionesClient(@Value("${DONACION_API_URL}") String baseUrl) {
         this.restClient = RestClient.builder()
                 .baseUrl(baseUrl)
                 .build();
@@ -30,12 +28,9 @@ public class DonacionClient {
                 .retrieve()
                 .body(ProductoDTO.class);
     }
-    public void postQueja(String donacionID, String descripcion) {
-        DonacionDTO donacion = new DonacionDTO(null,null,null,descripcion,null,null,null);
+    public void postQueja(String donacionID) {
         restClient.post()
                 .uri("/donaciones/{donacionID}/queja", donacionID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(donacion)
                 .retrieve()
                 .toBodilessEntity();
     }

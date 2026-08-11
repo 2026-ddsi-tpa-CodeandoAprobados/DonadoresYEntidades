@@ -3,7 +3,7 @@ package ar.edu.utn.dds.k3003.service;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.*;
 import ar.edu.utn.dds.k3003.catedra.fachadas.FachadaDonadoresYEntidades;
 import ar.edu.utn.dds.k3003.catedra.fachadas.FachadaIncentivos;
-import ar.edu.utn.dds.k3003.clients.DonacionClient;
+import ar.edu.utn.dds.k3003.clients.DonacionesClient;
 import ar.edu.utn.dds.k3003.clients.IncentivosClient;
 import ar.edu.utn.dds.k3003.clients.LogisticaClient;
 import ar.edu.utn.dds.k3003.exceptions.*;
@@ -20,8 +20,8 @@ import ar.edu.utn.dds.k3003.repositories.InMemory.InMemoryEntidadesBeneficasRepo
 import ar.edu.utn.dds.k3003.repositories.InMemory.InMemoryNecesidadMaterialRepo;
 import ar.edu.utn.dds.k3003.repositories.InMemory.InMemoryQuejasRepo;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 import jakarta.transaction.Transactional;
+import lombok.Setter;
 import lombok.val;
 import org.springframework.stereotype.Component;
 
@@ -31,8 +31,11 @@ import java.util.NoSuchElementException;
 @Component
 public class Fachada implements FachadaDonadoresYEntidades {
     private FachadaIncentivos fachadaIncentivos;
-    private DonacionClient donacionClient;
+    @Setter
+    private DonacionesClient donacionesClient;
+    @Setter
     private IncentivosClient incentivosClient;
+    @Setter
     private LogisticaClient logisticaClient;
 
     //MAPPERS
@@ -58,8 +61,8 @@ public class Fachada implements FachadaDonadoresYEntidades {
         this.necesidadMaterialRepository = new InMemoryNecesidadMaterialRepo();
         this.quejasRepository = new InMemoryQuejasRepo();
     }
-    public Fachada(DonacionClient donacionClient) {
-        this.donacionClient = donacionClient;
+    public Fachada(DonacionesClient donacionesClient) {
+        this.donacionesClient = donacionesClient;
     }
     public Fachada(IncentivosClient incentivosClient) {
         this.incentivosClient = incentivosClient;
@@ -113,13 +116,13 @@ public class Fachada implements FachadaDonadoresYEntidades {
         }
         buscarDonadorPorID(quejaDTO.donadorID());
 
-//        try{
-//            if(donacionClient.getDonacion(quejaDTO.donacionID()) != null){
-//                donacionClient.postQueja(quejaDTO.donacionID(),quejaDTO.descripcion());
-//            }
-//        } catch (RuntimeException e) {
-//            throw new RuntimeException("Fallo en la conexion con Donaciones");
-//        }
+        try{
+            if(donacionesClient.getDonacion(quejaDTO.donacionID()) != null){
+                donacionesClient.postQueja(quejaDTO.donacionID());
+            }
+        } catch (RuntimeException e) {
+            throw new RuntimeException("La donacion no esta ACEPTADA");
+        }
 
         val queja = quejaDataMapper.toQueja(quejaDTO);
 
@@ -272,14 +275,14 @@ public class Fachada implements FachadaDonadoresYEntidades {
         }
         buscarEntidadPorID(necesidadMaterialDTO.entidadID());
 
+        try{
+            donacionesClient.getProducto(necesidadMaterialDTO.productoSolicitadoID());
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Fallo en la conexion con Donaciones");
+        }
+
 //        try{
-//            donacionClient.getProducto(necesidadMaterialDTO.productoSolicitadoID());
-//        } catch (RuntimeException e) {
-//            throw new RuntimeException("Fallo en la conexion con Donaciones");
-//        }
-//
-//        try{
-//            if(logisticaClient.strokeDisponible(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialDTO.cantidadObjetivo())){
+//            if(logisticaClient.stokeDisponible(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialDTO.cantidadObjetivo())){
 //                logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialDTO.cantidadObjetivo());
 //            }
 //        } catch (RuntimeException e) {
@@ -318,33 +321,40 @@ public class Fachada implements FachadaDonadoresYEntidades {
                 stream().map(x->necesidadMaterialDataMapper.toNecesidadMaterialDTO(x)).toList();
     }
 
-    //MODIFICA NECESIDAD MATERIAL
+    //MODIFICAR NECESIDAD
     @Override
     @Transactional
     public NecesidadMaterialDTO satisfacerNecesidad(String necesidadID, Integer cantidad) throws NoSuchElementException {
         if (cantidad == null || cantidad <= 0) {
             throw new RuntimeException("La cantidad debe ser mayor a cero");
         }
-        val necesidad = necesidadMaterialRepository.findById(necesidadID);
-        if (necesidad.isEmpty()) {
+
+        val necesidadOpt = necesidadMaterialRepository.findById(necesidadID);
+        if (necesidadOpt.isEmpty()) {
             throw new NoSuchElementException("La necesidad no existe");
         }
-        if (necesidad.get().getTipo().equals(TipoNecesidadMaterialEnum.RECURRENTE)) {
-            if(cantidad < necesidad.get().getCantidadObjetivo()){
-                throw new IllegalArgumentException("No se puede safisfacer una necesidad de forma parcial");
-            }
-            else {
-                necesidad.get().setCantidadObjetivo(necesidad.get().getCantidadObjetivo() - cantidad);
+        val necesidad = necesidadOpt.get();
+        if (necesidad.getTipo().equals(TipoNecesidadMaterialEnum.RECURRENTE)) {
+            if (cantidad < necesidad.getCantidadObjetivo()) {
+                throw new IllegalArgumentException("No se puede safisfacer una necesidad RECURRENTE de forma parcial");
+            } else {
+                necesidad.setCantidadObjetivo(0);
+                this.necesidadMaterialRepository.deleteById(necesidadID);
+                return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad);
             }
         }
-        else if(necesidad.get().getTipo().equals(TipoNecesidadMaterialEnum.EXTRAORDINARIA)){
-            necesidad.get().setCantidadObjetivo(necesidad.get().getCantidadObjetivo() - cantidad);
-            this.necesidadMaterialRepository.deleteById(necesidadID);
-            this.necesidadMaterialRepository.save(necesidad.get());
-            return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad.get());
+        else if (necesidad.getTipo().equals(TipoNecesidadMaterialEnum.EXTRAORDINARIA)) {
+            int nuevaCantidad = necesidad.getCantidadObjetivo() - cantidad;
+            if (nuevaCantidad <= 0) {
+                necesidad.setCantidadObjetivo(0);
+                this.necesidadMaterialRepository.deleteById(necesidadID);
+                return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad);
+            } else {
+                necesidad.setCantidadObjetivo(nuevaCantidad);
+                this.necesidadMaterialRepository.save(necesidad);
+            }
         }
-        this.necesidadMaterialRepository.save(necesidad.get());
-        return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad.get());
+        return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad);
     }
 
     @Transactional
