@@ -288,6 +288,11 @@ public class Fachada implements FachadaDonadoresYEntidades {
                 val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
                 logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialGuardada.getId(), necesidadMaterialDTO.cantidadObjetivo());
             }
+            else {
+                val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
+                val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
+                logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialGuardada.getId(), stock.cantidadDisponible());
+            }
         } catch (RuntimeException e) {
             throw new RuntimeException("Fallo en la conexion con Logistica");
         }
@@ -341,7 +346,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
                 throw new IllegalArgumentException("No se puede safisfacer una necesidad RECURRENTE de forma parcial");
             } else {
                 necesidad.setCantidadObjetivo(0);
-                this.necesidadMaterialRepository.deleteById(necesidadID);
+                //this.necesidadMaterialRepository.deleteById(necesidadID);
                 return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad);
             }
         }
@@ -349,7 +354,7 @@ public class Fachada implements FachadaDonadoresYEntidades {
             int nuevaCantidad = necesidad.getCantidadObjetivo() - cantidad;
             if (nuevaCantidad <= 0) {
                 necesidad.setCantidadObjetivo(0);
-                this.necesidadMaterialRepository.deleteById(necesidadID);
+                //this.necesidadMaterialRepository.deleteById(necesidadID);
                 return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad);
             } else {
                 necesidad.setCantidadObjetivo(nuevaCantidad);
