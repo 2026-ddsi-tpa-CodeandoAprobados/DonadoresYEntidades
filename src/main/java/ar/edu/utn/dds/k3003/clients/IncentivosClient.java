@@ -1,6 +1,5 @@
 package ar.edu.utn.dds.k3003.clients;
 
-
 import ar.edu.utn.dds.k3003.catedra.dtos.incentivos.InsigniaDTO;
 import ar.edu.utn.dds.k3003.catedra.dtos.incentivos.MisionDTO;
 import org.springframework.beans.factory.annotation.Value;

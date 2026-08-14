@@ -1,4 +1,4 @@
-package ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades;
+package ar.edu.utn.dds.k3003.dtos;
 
 public record StockDisponibleDTO(
         String productoID, Integer cantidadDisponible) {}

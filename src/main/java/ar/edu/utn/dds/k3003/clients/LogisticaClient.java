@@ -1,11 +1,10 @@
 package ar.edu.utn.dds.k3003.clients;
 
-import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.AsignacionNecesidadDTO;
-import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.StockDisponibleDTO;
+import ar.edu.utn.dds.k3003.dtos.AsignacionNecesidadDTO;
+import ar.edu.utn.dds.k3003.dtos.StockDisponibleDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 @Service

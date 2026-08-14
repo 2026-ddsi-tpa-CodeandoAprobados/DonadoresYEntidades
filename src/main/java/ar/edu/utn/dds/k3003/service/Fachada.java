@@ -278,23 +278,21 @@ public class Fachada implements FachadaDonadoresYEntidades {
         try{
             donacionesClient.getProducto(necesidadMaterialDTO.productoSolicitadoID());
         } catch (RuntimeException e) {
-            throw new RuntimeException("Fallo en la conexion con Donaciones");
+            throw new RuntimeException("Fallo algo en la conexion con Donaciones");
         }
 
         try{
             val stock = logisticaClient.stockDisponible(necesidadMaterialDTO.productoSolicitadoID());
+            val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
+            val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
             if(stock.cantidadDisponible() >= necesidadMaterialDTO.cantidadObjetivo()){
-                val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
-                val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
                 logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialGuardada.getId(), necesidadMaterialDTO.cantidadObjetivo());
             }
             else {
-                val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
-                val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
                 logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialGuardada.getId(), stock.cantidadDisponible());
             }
         } catch (RuntimeException e) {
-            throw new RuntimeException("Fallo en la conexion con Logistica");
+            throw new RuntimeException("Fallo algo en la conexion con Logistica");
         }
         val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
         val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
