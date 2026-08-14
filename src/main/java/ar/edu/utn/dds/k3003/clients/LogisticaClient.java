@@ -1,8 +1,11 @@
 package ar.edu.utn.dds.k3003.clients;
 
+import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.AsignacionNecesidadDTO;
+import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.StockDisponibleDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 @Service
@@ -15,19 +18,19 @@ public class LogisticaClient {
                 .build();
     }
 
-    public Boolean stokeDisponible(String productoID, Integer cantidadObjetivo){
-        return true;
-//        return restClient.get()
-//                .uri("/donaciones/{productoID}", productoID)
-//                .retrieve()
-//                .body(DonacionDTO.class);
+    public StockDisponibleDTO stockDisponible(String productoID){
+            return restClient.get()
+                    .uri("/stock/{productoID}", productoID)
+                    .retrieve()
+                    .body(StockDisponibleDTO.class);
     }
 
-    public void asignar(String productoID, Integer cantidadObjetivo){
+    public void asignar(String productoID, String necesidadID,Integer cantidadObjetivo){
+        AsignacionNecesidadDTO asignacionNecesidadDTO = new AsignacionNecesidadDTO(necesidadID, cantidadObjetivo, true);
         restClient.post()
-                .uri("/asignaciones/{productoID}", productoID)
+                .uri("/stock/{productoID}/asignaciones", productoID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(cantidadObjetivo)
+                .body(asignacionNecesidadDTO)
                 .retrieve()
                 .toBodilessEntity();
     }

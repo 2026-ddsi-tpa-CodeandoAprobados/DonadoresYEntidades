@@ -281,14 +281,16 @@ public class Fachada implements FachadaDonadoresYEntidades {
             throw new RuntimeException("Fallo en la conexion con Donaciones");
         }
 
-//        try{
-//            if(logisticaClient.stokeDisponible(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialDTO.cantidadObjetivo())){
-//                logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialDTO.cantidadObjetivo());
-//            }
-//        } catch (RuntimeException e) {
-//            throw new RuntimeException("Fallo en la conexion con Logistica");
-//        }
-
+        try{
+            val stock = logisticaClient.stockDisponible(necesidadMaterialDTO.productoSolicitadoID());
+            if(stock.cantidadDisponible() >= necesidadMaterialDTO.cantidadObjetivo()){
+                val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
+                val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
+                logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialGuardada.getId(), necesidadMaterialDTO.cantidadObjetivo());
+            }
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Fallo en la conexion con Logistica");
+        }
         val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
         val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
         return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidadMaterialGuardada);
