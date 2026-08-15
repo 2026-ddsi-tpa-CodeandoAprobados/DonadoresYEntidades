@@ -1,6 +1,7 @@
 package ar.edu.utn.dds.k3003.clients;
 
 import ar.edu.utn.dds.k3003.dtos.AsignacionNecesidadDTO;
+import ar.edu.utn.dds.k3003.dtos.OrigenAsignacionEnum;
 import ar.edu.utn.dds.k3003.dtos.StockDisponibleDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -25,7 +26,7 @@ public class LogisticaClient {
     }
 
     public void asignar(String productoID, String necesidadID,Integer cantidadObjetivo){
-        AsignacionNecesidadDTO asignacionNecesidadDTO = new AsignacionNecesidadDTO(necesidadID, cantidadObjetivo, true);
+        AsignacionNecesidadDTO asignacionNecesidadDTO = new AsignacionNecesidadDTO(necesidadID, cantidadObjetivo, OrigenAsignacionEnum.SOLICITUD_DONADORES);
         restClient.post()
                 .uri("/stock/{productoID}/asignaciones", productoID)
                 .contentType(MediaType.APPLICATION_JSON)
