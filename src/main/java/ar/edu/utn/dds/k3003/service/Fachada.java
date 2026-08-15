@@ -275,27 +275,19 @@ public class Fachada implements FachadaDonadoresYEntidades {
         }
         buscarEntidadPorID(necesidadMaterialDTO.entidadID());
 
-        try{
-            donacionesClient.getProducto(necesidadMaterialDTO.productoSolicitadoID());
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Fallo algo en la conexion con Donaciones");
-        }
+        donacionesClient.getProducto(necesidadMaterialDTO.productoSolicitadoID());
 
-        try{
-            val stock = logisticaClient.stockDisponible(necesidadMaterialDTO.productoSolicitadoID());
-            val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
-            val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
-            if(stock.cantidadDisponible() >= necesidadMaterialDTO.cantidadObjetivo()){
-                logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialGuardada.getId(), necesidadMaterialDTO.cantidadObjetivo());
-            }
-            else {
-                logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialGuardada.getId(), stock.cantidadDisponible());
-            }
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Fallo algo en la conexion con Logistica");
-        }
+        val stock = logisticaClient.stockDisponible(necesidadMaterialDTO.productoSolicitadoID());
+
         val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
         val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
+
+        if(stock.cantidadDisponible() >= necesidadMaterialDTO.cantidadObjetivo()){
+            logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialGuardada.getId(), necesidadMaterialDTO.cantidadObjetivo());
+        }
+        else {
+            logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialGuardada.getId(), stock.cantidadDisponible());
+            }
         return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidadMaterialGuardada);
     }
 
