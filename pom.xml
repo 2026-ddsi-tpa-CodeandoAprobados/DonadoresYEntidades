@@ -9,8 +9,8 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.8</version>
-    <relativePath />
+    <version>4.1.0</version>
+    <relativePath/>
   </parent>
 
   <groupId>ar.edu.utn.dds.k3003</groupId>
@@ -22,7 +22,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>21</java.version>
-    <spring-ai.version>1.0.0</spring-ai.version>
+    <spring-ai.version>2.0.0</spring-ai.version>
     <!-- Dependencies versions -->
     <mockito.version>5.22.0</mockito.version>
   </properties>
@@ -43,8 +43,8 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
-    <dependency>
 
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
