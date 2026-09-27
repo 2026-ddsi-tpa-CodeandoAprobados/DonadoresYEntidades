@@ -336,16 +336,14 @@ public class Fachada implements FachadaDonadoresYEntidades {
                 throw new IllegalArgumentException("No se puede safisfacer una necesidad RECURRENTE de forma parcial");
             } else {
                 necesidad.setCantidadObjetivo(0);
-                //this.necesidadMaterialRepository.deleteById(necesidadID);
-                return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad);
+                necesidadMaterialRepository.save(necesidad);
             }
         }
         else if (necesidad.getTipo().equals(TipoNecesidadMaterialEnum.EXTRAORDINARIA)) {
             int nuevaCantidad = necesidad.getCantidadObjetivo() - cantidad;
             if (nuevaCantidad <= 0) {
                 necesidad.setCantidadObjetivo(0);
-                //this.necesidadMaterialRepository.deleteById(necesidadID);
-                return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad);
+                necesidadMaterialRepository.save(necesidad);
             } else {
                 necesidad.setCantidadObjetivo(nuevaCantidad);
                 this.necesidadMaterialRepository.save(necesidad);
