@@ -53,6 +53,9 @@ public class InDataBaseEntidadesBeneficasRepo implements EntidadesBeneficasRepos
 
     @Override
     public void deleteAll() {
+        // Las necesidades referencian a la entidad (FK). Se borran primero porque
+        // el DELETE masivo de JPQL no aplica el cascade.
+        entityManager.createQuery("DELETE FROM NecesidadMaterial").executeUpdate();
         entityManager.createQuery("DELETE FROM EntidadBenefica").executeUpdate();
     }
 }

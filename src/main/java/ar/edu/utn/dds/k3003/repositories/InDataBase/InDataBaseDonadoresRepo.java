@@ -52,6 +52,9 @@ public class InDataBaseDonadoresRepo implements DonadoresRepository {
 
   @Override
   public void deleteAll() {
+    // Las quejas referencian al donador (FK). Se borran primero porque el
+    // DELETE masivo de JPQL no aplica el cascade.
+    entityManager.createQuery("DELETE FROM Queja").executeUpdate();
     entityManager.createQuery("DELETE FROM Donador").executeUpdate();
   }
 }
