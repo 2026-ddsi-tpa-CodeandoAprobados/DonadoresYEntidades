@@ -44,14 +44,16 @@ public class DonadorController {
 
   @PatchMapping("/{donadorID}/estado")
   public ResponseEntity<DonadorDTO> patchEstado(@PathVariable String donadorID, @RequestBody Map<String, EstadoDonadorEnum> requestBody) {
-    log.info("Se modificó el estado del donador con ID: {}", donadorID);
-    return ResponseEntity.status(HttpStatus.ACCEPTED).body(this.fachada.modificarEstado(donadorID,requestBody.get("estado")));
+    var estado = requestBody.get("estado");
+    log.info("Se modificó el estado del donador con ID: {} por el estado: {}", donadorID, estado);
+    return ResponseEntity.status(HttpStatus.ACCEPTED).body(this.fachada.modificarEstado(donadorID, estado));
   }
 
   @PatchMapping("/{donadorID}/categoria")
   public ResponseEntity<DonadorDTO> patchCategoria(@PathVariable String donadorID, @RequestBody Map<String,String> requestBody) {
-    log.info("Se modifico la categoria del donador de ID: {}", donadorID);
-    return ResponseEntity.status(HttpStatus.ACCEPTED).body(this.fachada.modifcarCategoria(donadorID,requestBody.get("categoria")));
+    var categoria = requestBody.get("categoria");
+    log.info("Se modifico la categoria del donador con ID: {} por la categoria: {}", donadorID, categoria);
+    return ResponseEntity.status(HttpStatus.ACCEPTED).body(this.fachada.modifcarCategoria(donadorID, categoria));
   }
 
   @GetMapping("/{donadorID}/puede-donar")

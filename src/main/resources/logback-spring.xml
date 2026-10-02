@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+    <springProperty scope="context" name="BETTERSTACK_SOURCE_TOKEN" source="BETTERSTACK_SOURCE_TOKEN"/>
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name"/>
+    <springProperty scope="context" name="BETTERSTACK_INGEST_URL" source="BETTERSTACK_INGEST_URL"/>
+    <logger name="org.hibernate.engine.internal.StatisticalLoggingSessionEventListener" level="WARN"/>
+
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%method:%line [trace=%X{traceId} instance=%X{instanceId} req=%X{requestId}] - %msg%n</pattern>
@@ -10,12 +15,13 @@
     <if condition='isDefined("BETTERSTACK_SOURCE_TOKEN")'>
         <then>
             <appender name="BETTERSTACK" class="com.logtail.logback.LogtailAppender">
-                <appName>${APP_NAME:-donadores}</appName>
+                <appName>${APP_NAME}</appName>
                 <sourceToken>${BETTERSTACK_SOURCE_TOKEN}</sourceToken>
-                <ingestUrl>${BETTERSTACK_INGEST_URL:-https://in.logs.betterstack.com}</ingestUrl>
+                <ingestUrl>${BETTERSTACK_INGEST_URL}</ingestUrl>
                 <mdcFields>traceId,instanceId,requestId</mdcFields>
                 <mdcTypes>string,string,string</mdcTypes>
             </appender>
+
             <root level="INFO">
                 <appender-ref ref="CONSOLE"/>
                 <appender-ref ref="BETTERSTACK"/>

@@ -26,7 +26,10 @@ public class NecesidadController {
 
     @PostMapping
     public ResponseEntity<NecesidadMaterialDTO> postMaterial(@RequestBody NecesidadMaterialDTO necesidadMaterialDTO) {
-        log.info("Se registro una necesidad de material");
+        log.info("Se registro una necesidad de material sobre la entidad benefica de ID: {} de un producto de ID: {} y con una cantidad objetivo de: {}",
+                necesidadMaterialDTO.entidadID(),
+                necesidadMaterialDTO.productoSolicitadoID(),
+                necesidadMaterialDTO.cantidadObjetivo());
         meterRegistry.counter("api.necesidad.registrada", "origen", "http").increment();
         return ResponseEntity.status(HttpStatus.CREATED).body(this.fachada.registrarNecesidad(necesidadMaterialDTO));
     }
@@ -50,13 +53,15 @@ public class NecesidadController {
 
     @PostMapping("/{necesidadID}/satisfaccion")
     public ResponseEntity<NecesidadMaterialDTO> postSatisfacerNecesidad(@PathVariable String necesidadID, @RequestBody Map<String, Integer> requestBody) {
-        log.info("Se satisface la necesidad de material de ID: {}", necesidadID);
-        return ResponseEntity.status(HttpStatus.OK).body(this.fachada.satisfacerNecesidad(necesidadID,requestBody.get("cantidad")));
+        var cantidad = requestBody.get("cantidad");
+        log.info("Se satisface la necesidad de material de ID: {} con una cantidad de: {}", necesidadID, cantidad);
+        return ResponseEntity.status(HttpStatus.OK).body(this.fachada.satisfacerNecesidad(necesidadID, cantidad));
     }
 
     @PatchMapping("/{necesidadID}/cantidad-objetivo")
     public ResponseEntity<NecesidadMaterialDTO> patchNecesidadMaterial(@PathVariable String necesidadID, @RequestBody Map<String,Integer> requestBody){
-        log.info("Se modifoco la cantidad objetivo de la necesidad de material de ID: {}", necesidadID);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(this.fachada.modificarNecesidad(necesidadID,requestBody.get("cantidadObjetivo")));
+        var cantidadObjetivo = requestBody.get("cantidadObjetivo");
+        log.info("Se modifoco la cantidad objetivo de la necesidad de material de ID: {} por la nueva cantidad objetivo de {}", necesidadID, cantidadObjetivo);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(this.fachada.modificarNecesidad(necesidadID, cantidadObjetivo));
     }
 }

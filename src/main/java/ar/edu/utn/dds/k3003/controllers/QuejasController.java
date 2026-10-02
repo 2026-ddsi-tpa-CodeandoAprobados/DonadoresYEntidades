@@ -22,7 +22,7 @@ public class QuejasController {
 
     @PostMapping
     public ResponseEntity<QuejaDTO> agregarQueja(@RequestBody QuejaDTO quejaDTO) {
-        log.info("Se registro una queja sobre el donador de ID: {}", quejaDTO.id());
+        log.info("Se registro una queja a un donador de ID: {} de sobre la donacion de ID: {}", quejaDTO.donadorID(), quejaDTO.donacionID());
         meterRegistry.counter("api.queja.registrada", "origen", "http").increment();
         return ResponseEntity.status(HttpStatus.CREATED).body(this.fachada.agregarQueja(quejaDTO));
     }

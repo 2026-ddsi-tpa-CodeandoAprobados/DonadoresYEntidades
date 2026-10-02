@@ -50,8 +50,9 @@ public class EntidadController {
 
     @PatchMapping("/{entidadID}/razon-social")
     public ResponseEntity<EntidadBeneficaDTO> patchEntidad(@PathVariable String entidadID, @RequestBody Map<String,String> requestBody){
-        log.info("Se modifico la razon social de la entidad benefica de ID: {}", entidadID);
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.fachada.modificarRazonSocial(entidadID, requestBody.get("razonSocial")));
+        var razonSocial = requestBody.get("razonSocial");
+        log.info("Se modifico la razon social de la entidad benefica de ID: {} por la razon social: {}", entidadID, razonSocial);
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.fachada.modificarRazonSocial(entidadID, razonSocial));
     }
 
     @DeleteMapping
