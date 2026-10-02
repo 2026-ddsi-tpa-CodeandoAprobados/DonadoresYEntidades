@@ -2,12 +2,13 @@ package ar.edu.utn.dds.k3003.controllers;
 import ar.edu.utn.dds.k3003.service.Fachada;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.QuejaDTO;
 import io.micrometer.core.instrument.MeterRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-
+@Slf4j
 @RestController
 @RequestMapping("/quejas")
 public class QuejasController {
@@ -18,8 +19,10 @@ public class QuejasController {
         this.fachada = fachada;
         this.meterRegistry = meterRegistry;
     }
+
     @PostMapping
     public ResponseEntity<QuejaDTO> agregarQueja(@RequestBody QuejaDTO quejaDTO) {
+        log.info("Se registro una queja sobre el donador de ID: {}", quejaDTO.id());
         meterRegistry.counter("api.queja.registrada", "origen", "http").increment();
         return ResponseEntity.status(HttpStatus.CREATED).body(this.fachada.agregarQueja(quejaDTO));
     }
