@@ -284,6 +284,8 @@ public class Fachada implements FachadaDonadoresYEntidades {
 
         if(stock.cantidadDisponible() >= necesidadMaterialDTO.cantidadObjetivo()){
             logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialGuardada.getId(), necesidadMaterialDTO.cantidadObjetivo());
+            //if(logisticaClient.existeStock(necesidadMaterialDTO.productoSolicitadoID())) :: Boolean
+            //logisticaClient.asignar(necesidadMaterialDTO) ::
         }
         else {
             logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialGuardada.getId(), stock.cantidadDisponible());

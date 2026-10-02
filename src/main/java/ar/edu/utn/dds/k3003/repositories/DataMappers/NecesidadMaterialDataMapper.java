@@ -8,6 +8,7 @@ public class NecesidadMaterialDataMapper {
     public NecesidadMaterial toNecesidadMaterial(NecesidadMaterialDTO necesidadMaterialDTO){
 
         return new NecesidadMaterial(
+                necesidadMaterialDTO.id(),
                 necesidadMaterialDTO.entidadID(),
                 necesidadMaterialDTO.nivelDeUrgencia(),
                 necesidadMaterialDTO.descripcion(),

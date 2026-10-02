@@ -37,11 +37,13 @@ public class EntidadBenefica {
         }
     }
 
-    public EntidadBenefica(String razonSocial,
-                           String domicilio,
-                           String telefono,
-                           String correo) {
-
+    public EntidadBenefica(
+            String id,
+            String razonSocial,
+            String domicilio,
+            String telefono,
+            String correo) {
+        this.id = id;
         this.razonSocial = razonSocial;
         this.domicilio = domicilio;
         this.telefono = telefono;

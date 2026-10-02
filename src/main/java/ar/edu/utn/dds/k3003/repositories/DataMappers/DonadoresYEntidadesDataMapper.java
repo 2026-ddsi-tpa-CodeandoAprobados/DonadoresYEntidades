@@ -2,6 +2,7 @@ package ar.edu.utn.dds.k3003.repositories.DataMappers;
 
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.DonadorDTO;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.EntidadBeneficaDTO;
+import ar.edu.utn.dds.k3003.catedra.dtos.incentivos.CategoriaDonadorEnum;
 import ar.edu.utn.dds.k3003.model.Donador;
 import ar.edu.utn.dds.k3003.model.EntidadBenefica;
 
@@ -22,16 +23,20 @@ public class DonadoresYEntidadesDataMapper {
 
   public Donador toDonador(DonadorDTO donadorDTO) {
         return new Donador(
+        donadorDTO.id(),
         donadorDTO.nombre(),
         donadorDTO.apellido(),
         donadorDTO.edad(),
         donadorDTO.email(),
         donadorDTO.nroDocumento(),
-        donadorDTO.domicilio());
+        donadorDTO.domicilio(),
+        donadorDTO.estado(),
+        CategoriaDonadorEnum.valueOf(donadorDTO.categoria()));
   }
 
   public EntidadBenefica toEntidadBenefica(EntidadBeneficaDTO entidadBeneficaDTO){
       return new EntidadBenefica(
+              entidadBeneficaDTO.id(),
               entidadBeneficaDTO.razonSocial(),
               entidadBeneficaDTO.domicilio(),
               entidadBeneficaDTO.telefono(),

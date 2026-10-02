@@ -37,7 +37,12 @@ public class Queja{
         }
     }
 
-    public Queja(String donacionID, String donadorID, LocalDate fecha, String descripcion) {
+    public Queja(String id,
+                 String donacionID,
+                 String donadorID,
+                 LocalDate fecha,
+                 String descripcion) {
+        this.id = id;
         this.donacionID = donacionID;
         this.donadorID = donadorID;
         this.fecha = fecha;

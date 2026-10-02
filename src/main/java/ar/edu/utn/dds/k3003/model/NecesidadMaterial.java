@@ -42,7 +42,14 @@ public class NecesidadMaterial {
         }
     }
 
-    public NecesidadMaterial(String entidadID, Integer nivelDeUrgencia, String descripcion, Integer cantidadObjetivo, String productoSolicitadoID, TipoNecesidadMaterialEnum tipo) {
+    public NecesidadMaterial(String id,
+                             String entidadID,
+                             Integer nivelDeUrgencia,
+                             String descripcion,
+                             Integer cantidadObjetivo,
+                             String productoSolicitadoID,
+                             TipoNecesidadMaterialEnum tipo) {
+        this.id = id;
         this.entidadID = entidadID;
         this.nivelDeUrgencia = nivelDeUrgencia;
         this.descripcion = descripcion;

@@ -1,6 +1,7 @@
 package ar.edu.utn.dds.k3003.model;
 
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.EstadoDonadorEnum;
+import ar.edu.utn.dds.k3003.catedra.dtos.incentivos.CategoriaDonadorEnum;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -45,19 +46,23 @@ public class Donador {
     }
   }
   public Donador(
-      String nombre,
-      String apellido,
-      Integer edad,
-      String email,
-      String nroDocumento,
-      String domicilio) {
+          String id,
+          String nombre,
+          String apellido,
+          Integer edad,
+          String email,
+          String nroDocumento,
+          String domicilio,
+          EstadoDonadorEnum estado,
+          CategoriaDonadorEnum categoria) {
+    this.id = id;
     this.nombre = nombre;
     this.apellido = apellido;
     this.edad = edad;
     this.email = email;
     this.nroDocumento = nroDocumento;
     this.domicilio = domicilio;
-    this.estado = EstadoDonadorEnum.VERIFICADO;
-    this.categoria = "Ocasional";
+    this.estado = estado;
+    this.categoria = categoria.toString();
   }
 }

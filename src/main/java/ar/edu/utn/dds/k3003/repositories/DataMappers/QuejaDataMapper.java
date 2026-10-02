@@ -8,7 +8,8 @@ import java.util.List;
 public class QuejaDataMapper {
 
     public QuejaDTO toQuejaDTO(Queja queja){
-        return new QuejaDTO(queja.getId(),
+        return new QuejaDTO(
+                queja.getId(),
                 queja.getDonacionID(),
                 queja.getDonadorID(),
                 queja.getFecha(),
@@ -16,14 +17,12 @@ public class QuejaDataMapper {
     }
 
     public Queja toQueja(QuejaDTO quejaDTO){
-       return new Queja(quejaDTO.donacionID(),
-                         quejaDTO.donadorID(),
-                         quejaDTO.fecha(),
-                         quejaDTO.descripcion());
+       return new Queja(
+               quejaDTO.id(),
+               quejaDTO.donacionID(),
+               quejaDTO.donadorID(),
+               quejaDTO.fecha(),
+               quejaDTO.descripcion());
 
-    }
-
-    public List<QuejaDTO> toQuejasDTO(List<Queja> quejas){
-        return quejas.stream().map(x -> toQuejaDTO(x)).toList();
     }
 }
