@@ -3,6 +3,7 @@ package ar.edu.utn.dds.k3003.clients;
 import ar.edu.utn.dds.k3003.dtos.AsignacionNecesidadDTO;
 import ar.edu.utn.dds.k3003.dtos.OrigenAsignacionEnum;
 import ar.edu.utn.dds.k3003.dtos.StockDisponibleDTO;
+import ar.edu.utn.dds.k3003.logging.TrazaRestClientInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ public class LogisticaClient {
 
     public LogisticaClient(@Value("${LOGISTICA_API_URL}") String baseUrl) {
         this.restClient = RestClient.builder()
+                .requestInterceptor(new TrazaRestClientInterceptor())
                 .baseUrl(baseUrl)
                 .build();
     }

@@ -2,6 +2,7 @@ package ar.edu.utn.dds.k3003.clients;
 
 import ar.edu.utn.dds.k3003.catedra.dtos.donaciones.DonacionDTO;
 import ar.edu.utn.dds.k3003.catedra.dtos.donaciones.ProductoDTO;
+import ar.edu.utn.dds.k3003.logging.TrazaRestClientInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -13,6 +14,7 @@ public class DonacionesClient {
 
     public DonacionesClient(@Value("${DONACION_API_URL}") String baseUrl) {
         this.restClient = RestClient.builder()
+                .requestInterceptor(new TrazaRestClientInterceptor())
                 .baseUrl(baseUrl)
                 .build();
     }

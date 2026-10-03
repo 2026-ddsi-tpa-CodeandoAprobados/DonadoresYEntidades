@@ -2,6 +2,7 @@ package ar.edu.utn.dds.k3003.clients;
 
 import ar.edu.utn.dds.k3003.catedra.dtos.incentivos.InsigniaDTO;
 import ar.edu.utn.dds.k3003.catedra.dtos.incentivos.MisionDTO;
+import ar.edu.utn.dds.k3003.logging.TrazaRestClientInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ public class IncentivosClient {
 
     public IncentivosClient(@Value("${INCENTIVOS_API_URL}") String baseUrl) {
         this.restClient = RestClient.builder()
+                .requestInterceptor(new TrazaRestClientInterceptor())
                 .baseUrl(baseUrl)
                 .build();
     }
