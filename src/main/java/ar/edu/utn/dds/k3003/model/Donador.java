@@ -45,6 +45,28 @@ public class Donador {
       this.id = com.aventrix.jnanoid.jnanoid.NanoIdUtils.randomNanoId();
     }
   }
+
+  public Donador(
+          String id,
+          String nombre,
+          String apellido,
+          Integer edad,
+          String email,
+          String nroDocumento,
+          String domicilio,
+          EstadoDonadorEnum estado,
+          String categoria) {
+    this.id = id;
+    this.nombre = nombre;
+    this.apellido = apellido;
+    this.edad = edad;
+    this.email = email;
+    this.nroDocumento = nroDocumento;
+    this.domicilio = domicilio;
+    this.estado = estado;
+    this.categoria = categoria;
+  }
+
   public Donador(
           String id,
           String nombre,
@@ -55,14 +77,6 @@ public class Donador {
           String domicilio,
           EstadoDonadorEnum estado,
           CategoriaDonadorEnum categoria) {
-    this.id = id;
-    this.nombre = nombre;
-    this.apellido = apellido;
-    this.edad = edad;
-    this.email = email;
-    this.nroDocumento = nroDocumento;
-    this.domicilio = domicilio;
-    this.estado = estado;
-    this.categoria = categoria.toString();
+    this(id, nombre, apellido, edad, email, nroDocumento, domicilio, estado, categoria != null ? categoria.toString() : null);
   }
 }

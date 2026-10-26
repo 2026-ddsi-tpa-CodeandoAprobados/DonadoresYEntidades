@@ -1,16 +1,16 @@
 package ar.edu.utn.dds.k3003.controllers;
 
-import ar.edu.utn.dds.k3003.service.Fachada;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.DonadorDTO;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.DonadorStatsDTO;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.EstadoDonadorEnum;
+import ar.edu.utn.dds.k3003.service.Fachada;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -43,17 +43,24 @@ public class DonadorController {
   }
 
   @PatchMapping("/{donadorID}/estado")
-  public ResponseEntity<DonadorDTO> patchEstado(@PathVariable String donadorID, @RequestBody Map<String, EstadoDonadorEnum> requestBody) {
+  public ResponseEntity<DonadorDTO> patchEstado(
+      @PathVariable String donadorID, @RequestBody Map<String, EstadoDonadorEnum> requestBody) {
     var estado = requestBody.get("estado");
     log.info("Se modificó el estado del donador con ID: {} por el estado: {}", donadorID, estado);
-    return ResponseEntity.status(HttpStatus.ACCEPTED).body(this.fachada.modificarEstado(donadorID, estado));
+    return ResponseEntity.status(HttpStatus.ACCEPTED)
+        .body(this.fachada.modificarEstado(donadorID, estado));
   }
 
   @PatchMapping("/{donadorID}/categoria")
-  public ResponseEntity<DonadorDTO> patchCategoria(@PathVariable String donadorID, @RequestBody Map<String,String> requestBody) {
+  public ResponseEntity<DonadorDTO> patchCategoria(
+      @PathVariable String donadorID, @RequestBody Map<String, String> requestBody) {
     var categoria = requestBody.get("categoria");
-    log.info("Se modifico la categoria del donador con ID: {} por la categoria: {}", donadorID, categoria);
-    return ResponseEntity.status(HttpStatus.ACCEPTED).body(this.fachada.modifcarCategoria(donadorID, categoria));
+    log.info(
+        "Se modifico la categoria del donador con ID: {} por la categoria: {}",
+        donadorID,
+        categoria);
+    return ResponseEntity.status(HttpStatus.ACCEPTED)
+        .body(this.fachada.modifcarCategoria(donadorID, categoria));
   }
 
   @GetMapping("/{donadorID}/puede-donar")

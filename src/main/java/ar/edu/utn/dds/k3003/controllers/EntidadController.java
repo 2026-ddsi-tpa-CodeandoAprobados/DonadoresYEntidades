@@ -1,64 +1,69 @@
 package ar.edu.utn.dds.k3003.controllers;
 
-import ar.edu.utn.dds.k3003.service.Fachada;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.EntidadBeneficaDTO;
+import ar.edu.utn.dds.k3003.service.Fachada;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/entidades")
 public class EntidadController {
 
-    private Fachada fachada;
-    private MeterRegistry meterRegistry;
+  private Fachada fachada;
+  private MeterRegistry meterRegistry;
 
-    public EntidadController(Fachada fachada, MeterRegistry meterRegistry) {
-        this.fachada = fachada;
-        this.meterRegistry = meterRegistry;
-    }
+  public EntidadController(Fachada fachada, MeterRegistry meterRegistry) {
+    this.fachada = fachada;
+    this.meterRegistry = meterRegistry;
+  }
 
-    @PostMapping
-    public ResponseEntity<EntidadBeneficaDTO> postEntidad(@RequestBody EntidadBeneficaDTO entidadDTO) {
-        log.info("Se registro una entidad benefica");
-        meterRegistry.counter("api.entidades.creada", "origen", "http").increment();
-        return ResponseEntity.status(HttpStatus.CREATED).body(fachada.agregarEntidad(entidadDTO));
-    }
+  @PostMapping
+  public ResponseEntity<EntidadBeneficaDTO> postEntidad(
+      @RequestBody EntidadBeneficaDTO entidadDTO) {
+    log.info("Se registro una entidad benefica");
+    meterRegistry.counter("api.entidades.creada", "origen", "http").increment();
+    return ResponseEntity.status(HttpStatus.CREATED).body(fachada.agregarEntidad(entidadDTO));
+  }
 
-    @GetMapping("/{entidadID}")
-    public ResponseEntity<EntidadBeneficaDTO> getEntidad(@PathVariable String entidadID){
-        return ResponseEntity.status(HttpStatus.OK).body(fachada.buscarEntidadPorID(entidadID));
-    }
+  @GetMapping("/{entidadID}")
+  public ResponseEntity<EntidadBeneficaDTO> getEntidad(@PathVariable String entidadID) {
+    return ResponseEntity.status(HttpStatus.OK).body(fachada.buscarEntidadPorID(entidadID));
+  }
 
-    @GetMapping
-    public ResponseEntity<List<EntidadBeneficaDTO>> getAllEntidades() {
-        return ResponseEntity.status(HttpStatus.OK).body(this.fachada.obtenerTodasLasEntidades());
-    }
+  @GetMapping
+  public ResponseEntity<List<EntidadBeneficaDTO>> getAllEntidades() {
+    return ResponseEntity.status(HttpStatus.OK).body(this.fachada.obtenerTodasLasEntidades());
+  }
 
-    @DeleteMapping("/{entidadID}")
-    public ResponseEntity<Void> deleteEntidad(@PathVariable String entidadID) {
-        log.info("Se elimino la entidad benefica de ID: {}", entidadID);
-        this.fachada.quitarEntidad(entidadID);
-        return ResponseEntity.noContent().build();
-    }
+  @DeleteMapping("/{entidadID}")
+  public ResponseEntity<Void> deleteEntidad(@PathVariable String entidadID) {
+    log.info("Se elimino la entidad benefica de ID: {}", entidadID);
+    this.fachada.quitarEntidad(entidadID);
+    return ResponseEntity.noContent().build();
+  }
 
-    @PatchMapping("/{entidadID}/razon-social")
-    public ResponseEntity<EntidadBeneficaDTO> patchEntidad(@PathVariable String entidadID, @RequestBody Map<String,String> requestBody){
-        var razonSocial = requestBody.get("razonSocial");
-        log.info("Se modifico la razon social de la entidad benefica de ID: {} por la razon social: {}", entidadID, razonSocial);
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.fachada.modificarRazonSocial(entidadID, razonSocial));
-    }
+  @PatchMapping("/{entidadID}/razon-social")
+  public ResponseEntity<EntidadBeneficaDTO> patchEntidad(
+      @PathVariable String entidadID, @RequestBody Map<String, String> requestBody) {
+    var razonSocial = requestBody.get("razonSocial");
+    log.info(
+        "Se modifico la razon social de la entidad benefica de ID: {} por la razon social: {}",
+        entidadID,
+        razonSocial);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(this.fachada.modificarRazonSocial(entidadID, razonSocial));
+  }
 
-    @DeleteMapping
-    public ResponseEntity<Void> deleteAllEntidades() {
-        log.info("Se eliminaron todas las entidades beneficas");
-        this.fachada.quitarTodasLasEntidades();
-        return ResponseEntity.noContent().build();
-        }
-    }
+  @DeleteMapping
+  public ResponseEntity<Void> deleteAllEntidades() {
+    log.info("Se eliminaron todas las entidades beneficas");
+    this.fachada.quitarTodasLasEntidades();
+    return ResponseEntity.noContent().build();
+  }
+}

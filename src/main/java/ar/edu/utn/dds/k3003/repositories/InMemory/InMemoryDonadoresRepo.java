@@ -2,13 +2,12 @@ package ar.edu.utn.dds.k3003.repositories.InMemory;
 
 import ar.edu.utn.dds.k3003.model.Donador;
 import ar.edu.utn.dds.k3003.repositories.DonadoresRepository;
-import lombok.val;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import lombok.val;
 
 public class InMemoryDonadoresRepo implements DonadoresRepository {
 
@@ -19,13 +18,10 @@ public class InMemoryDonadoresRepo implements DonadoresRepository {
     this.donadores = new ArrayList<>();
   }
 
-
   @Override
   public Optional<Donador> findById(String id) {
 
-    return this.donadores.stream()
-            .filter(d -> Objects.equals(d.getId(), id))
-            .findFirst();
+    return this.donadores.stream().filter(d -> Objects.equals(d.getId(), id)).findFirst();
   }
 
   @Override
@@ -45,7 +41,7 @@ public class InMemoryDonadoresRepo implements DonadoresRepository {
   }
 
   @Override
-  public List<Donador> todosLosDonadores(){
+  public List<Donador> todosLosDonadores() {
     return donadores.stream().toList();
   }
 
@@ -54,6 +50,3 @@ public class InMemoryDonadoresRepo implements DonadoresRepository {
     this.donadores.clear();
   }
 }
-
-
-

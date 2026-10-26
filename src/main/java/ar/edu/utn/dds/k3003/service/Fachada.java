@@ -7,6 +7,7 @@ import ar.edu.utn.dds.k3003.clients.DonacionesClient;
 import ar.edu.utn.dds.k3003.clients.IncentivosClient;
 import ar.edu.utn.dds.k3003.clients.LogisticaClient;
 import ar.edu.utn.dds.k3003.exceptions.*;
+import ar.edu.utn.dds.k3003.messaging.DonadoresEventPublisher;
 import ar.edu.utn.dds.k3003.repositories.*;
 import ar.edu.utn.dds.k3003.repositories.DataMappers.DonadoresYEntidadesDataMapper;
 import ar.edu.utn.dds.k3003.repositories.DataMappers.NecesidadMaterialDataMapper;
@@ -21,395 +22,471 @@ import ar.edu.utn.dds.k3003.repositories.InMemory.InMemoryNecesidadMaterialRepo;
 import ar.edu.utn.dds.k3003.repositories.InMemory.InMemoryQuejasRepo;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.NoSuchElementException;
 import lombok.Setter;
 import lombok.val;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-
 @Component
 public class Fachada implements FachadaDonadoresYEntidades {
-    private FachadaIncentivos fachadaIncentivos;
-    @Setter
-    private DonacionesClient donacionesClient;
-    @Setter
-    private IncentivosClient incentivosClient;
-    @Setter
-    private LogisticaClient logisticaClient;
+  private FachadaIncentivos fachadaIncentivos;
+  @Setter private DonacionesClient donacionesClient;
+  @Setter private IncentivosClient incentivosClient;
+  @Setter private LogisticaClient logisticaClient;
+  @Setter private DonadoresEventPublisher eventPublisher;
 
-    //MAPPERS
-    private DonadoresYEntidadesDataMapper donadoresYEntidadesDataMapper = new DonadoresYEntidadesDataMapper();
-    private NecesidadMaterialDataMapper necesidadMaterialDataMapper = new NecesidadMaterialDataMapper();
-    private QuejaDataMapper quejaDataMapper = new QuejaDataMapper();
+  // MAPPERS
+  private DonadoresYEntidadesDataMapper donadoresYEntidadesDataMapper =
+      new DonadoresYEntidadesDataMapper();
+  private NecesidadMaterialDataMapper necesidadMaterialDataMapper =
+      new NecesidadMaterialDataMapper();
+  private QuejaDataMapper quejaDataMapper = new QuejaDataMapper();
 
-    //DATABASE
-    private DonadoresRepository donadoresRepository;
-    private EntidadesBeneficasRepository entidadesBeneficasRepository;
-    private NecesidadMaterialRepository necesidadMaterialRepository;
-    private QuejasRepository quejasRepository;
+  // DATABASE
+  private DonadoresRepository donadoresRepository;
+  private EntidadesBeneficasRepository entidadesBeneficasRepository;
+  private NecesidadMaterialRepository necesidadMaterialRepository;
+  private QuejasRepository quejasRepository;
 
-    public Fachada(EntityManager entityManager) {
-        this.donadoresRepository = new InDataBaseDonadoresRepo(entityManager);
-        this.entidadesBeneficasRepository = new InDataBaseEntidadesBeneficasRepo(entityManager);
-        this.necesidadMaterialRepository = new InDataBaseNecesidadMaterialRepo(entityManager);
-        this.quejasRepository = new InDataBaseQuejasRepo(entityManager);
+  public Fachada(EntityManager entityManager) {
+    this.donadoresRepository = new InDataBaseDonadoresRepo(entityManager);
+    this.entidadesBeneficasRepository = new InDataBaseEntidadesBeneficasRepo(entityManager);
+    this.necesidadMaterialRepository = new InDataBaseNecesidadMaterialRepo(entityManager);
+    this.quejasRepository = new InDataBaseQuejasRepo(entityManager);
+  }
+
+  public Fachada() {
+    this.donadoresRepository = new InMemoryDonadoresRepo();
+    this.entidadesBeneficasRepository = new InMemoryEntidadesBeneficasRepo();
+    this.necesidadMaterialRepository = new InMemoryNecesidadMaterialRepo();
+    this.quejasRepository = new InMemoryQuejasRepo();
+  }
+
+  public Fachada(DonacionesClient donacionesClient) {
+    this.donacionesClient = donacionesClient;
+  }
+
+  public Fachada(IncentivosClient incentivosClient) {
+    this.incentivosClient = incentivosClient;
+  }
+
+  public Fachada(LogisticaClient logisticaClient) {
+    this.logisticaClient = logisticaClient;
+  }
+
+  public List<EntidadBeneficaDTO> obtenerTodasLasEntidades() {
+    return entidadesBeneficasRepository.todasLasEntidades().stream()
+        .map(x -> donadoresYEntidadesDataMapper.toEntidadBeneficaDTO(x))
+        .toList();
+  }
+
+  public List<DonadorDTO> obtenerTodosLosDonadores() {
+    return donadoresRepository.todosLosDonadores().stream()
+        .map(x -> donadoresYEntidadesDataMapper.toDonadorDTO(x))
+        .toList();
+  }
+
+  // ALTA DONADOR
+  @Override
+  @Transactional
+  public DonadorDTO agregarDonador(DonadorDTO donadorDTO) {
+    if (this.donadoresRepository.findById(donadorDTO.id()).isPresent()) {
+      throw new DonadorYaExistenteException("Ya existe un donador con ese ID");
     }
-    public Fachada(){
-        this.donadoresRepository = new InMemoryDonadoresRepo();
-        this.entidadesBeneficasRepository = new InMemoryEntidadesBeneficasRepo();
-        this.necesidadMaterialRepository = new InMemoryNecesidadMaterialRepo();
-        this.quejasRepository = new InMemoryQuejasRepo();
+    val donador = donadoresYEntidadesDataMapper.toDonador(donadorDTO);
+    val donadorGuardado = donadoresRepository.save(donador);
+    val res = donadoresYEntidadesDataMapper.toDonadorDTO(donadorGuardado);
+    if (eventPublisher != null) {
+      eventPublisher.publishDonadorCreado(res);
     }
-    public Fachada(DonacionesClient donacionesClient) {
-        this.donacionesClient = donacionesClient;
+    return res;
+  }
+
+  // BAJA DONADOR
+  @Transactional
+  public DonadorDTO quitarDonador(String donadorID) {
+    if (donadorID == null) {
+      throw new RuntimeException("El donadorID no puede ser nulo");
     }
-    public Fachada(IncentivosClient incentivosClient) {
-        this.incentivosClient = incentivosClient;
+    if (donadoresRepository.findById(donadorID).isEmpty()) {
+      throw new DonadorNoEncontradoException("No existe un donador con ese ID");
     }
-    public Fachada(LogisticaClient logisticaClient) {
-        this.logisticaClient = logisticaClient;
+    val donadorBorrado = this.donadoresRepository.deleteById(donadorID);
+    if (eventPublisher != null) {
+      eventPublisher.publishDonadorEliminado(donadorID);
     }
+    return donadoresYEntidadesDataMapper.toDonadorDTO(donadorBorrado);
+  }
 
-    public List<EntidadBeneficaDTO> obtenerTodasLasEntidades(){
-        return entidadesBeneficasRepository.todasLasEntidades().stream().map(x -> donadoresYEntidadesDataMapper.toEntidadBeneficaDTO(x)).toList();
+  // MODIFICAR DONADOR
+  @Override
+  @Transactional
+  public QuejaDTO agregarQueja(QuejaDTO quejaDTO) throws NoSuchElementException {
+    if (quejaDTO == null) {
+      throw new RuntimeException("La queja no puede ser nula");
     }
-
-    public List<DonadorDTO> obtenerTodosLosDonadores() {
-        return donadoresRepository.todosLosDonadores().stream().map(x -> donadoresYEntidadesDataMapper.toDonadorDTO(x)).toList();
+    if (quejasRepository.findById(quejaDTO.id()).isPresent()) {
+      throw new RuntimeException("La queja ya existe");
     }
+    buscarDonadorPorID(quejaDTO.donadorID());
 
-    //ALTA DONADOR
-    @Override
-    @Transactional
-    public DonadorDTO agregarDonador(DonadorDTO donadorDTO) {
-        if (this.donadoresRepository.findById(donadorDTO.id()).isPresent()) {
-            throw new DonadorYaExistenteException("Ya existe un donador con ese ID");
+    if (donacionesClient != null) {
+      try {
+        if (donacionesClient.getDonacion(quejaDTO.donacionID()) != null) {
+          donacionesClient.postQueja(quejaDTO.donacionID());
         }
-        val donador = donadoresYEntidadesDataMapper.toDonador(donadorDTO);
-        val donadorGuardado = donadoresRepository.save(donador);
-        return donadoresYEntidadesDataMapper.toDonadorDTO(donadorGuardado);
-    }
-
-    //BAJA DONADOR
-    @Transactional
-    public DonadorDTO quitarDonador(String donadorID){
-        if (donadorID == null) {
-            throw new RuntimeException("El donadorID no puede ser nulo");
-        }
-        if (donadoresRepository.findById(donadorID).isEmpty()) {
-            throw new DonadorNoEncontradoException("No existe un donador con ese ID");
-        }
-        val donadorBorrado = this.donadoresRepository.deleteById(donadorID);
-        return donadoresYEntidadesDataMapper.toDonadorDTO(donadorBorrado);
-    }
-
-    //MODIFICAR DONADOR
-    @Override
-    @Transactional
-    public QuejaDTO agregarQueja(QuejaDTO quejaDTO) throws NoSuchElementException{
-        if (quejaDTO == null) {
-            throw new RuntimeException("La queja no puede ser nula");
-        }
-        if (quejasRepository.findById(quejaDTO.id()).isPresent()) {
-            throw new RuntimeException("La queja ya existe");
-        }
-        buscarDonadorPorID(quejaDTO.donadorID());
-
-        try{
-            if(donacionesClient.getDonacion(quejaDTO.donacionID()) != null){
-                donacionesClient.postQueja(quejaDTO.donacionID());
-            }
-        } catch (RuntimeException e) {
-            throw new RuntimeException("La donacion no esta ACEPTADA");
-        }
-
-        val queja = quejaDataMapper.toQueja(quejaDTO);
-
-        val guardada = quejasRepository.save(queja);
-
-        if(quejasRepository.quejasDeUnDonador(queja.getDonadorID()).size() == 5){
-            modificarEstado(queja.getDonadorID(), EstadoDonadorEnum.SOSPECHOSO);
-        }
-        if(quejasRepository.quejasDeUnDonador(queja.getDonadorID()).size() == 10){
-            modificarEstado(queja.getDonadorID(), EstadoDonadorEnum.BANEADO);
-        }
-
-        return quejaDataMapper.toQuejaDTO(guardada);
-    }
-
-    //MODIFICAR DONADOR
-    @Override
-    @Transactional
-    public DonadorDTO modificarEstado(String donadorID, EstadoDonadorEnum estado) throws NoSuchElementException {
-        if (estado == null) {
-            throw new RuntimeException("El estado no puede ser nulo");
-        }
-        val donador = this.donadoresRepository.findById(donadorID);
-        if (donador.isEmpty()) {
-            throw new NoSuchElementException("No existe un donador con ese ID");
-        }
-        donador.get().setEstado(estado);
-        this.donadoresRepository.save(donador.get());
-        return donadoresYEntidadesDataMapper.toDonadorDTO(donador.get());
+      } catch (RuntimeException e) {
+        throw new RuntimeException("La donacion no esta ACEPTADA");
+      }
     }
 
-    //MODIFICAR DONADOR
-    @Override
-    @Transactional
-    public DonadorDTO modifcarCategoria(String donadorID, String categoria) throws NoSuchElementException {
-        if (categoria == null) {
-            throw new RuntimeException("La categoria no puede ser nula");
-        }
-        val donador = this.donadoresRepository.findById(donadorID);
-        if (donador.isEmpty()) {
-            throw new NoSuchElementException("No existe un donador con ese ID");
-        }
-        donador.get().setCategoria(categoria);
-        this.donadoresRepository.save(donador.get());
-        return donadoresYEntidadesDataMapper.toDonadorDTO(donador.get());
+    val queja = quejaDataMapper.toQueja(quejaDTO);
+    val guardada = quejasRepository.save(queja);
+
+    if (quejasRepository.quejasDeUnDonador(queja.getDonadorID()).size() == 5) {
+      modificarEstado(queja.getDonadorID(), EstadoDonadorEnum.SOSPECHOSO);
+    }
+    if (quejasRepository.quejasDeUnDonador(queja.getDonadorID()).size() == 10) {
+      modificarEstado(queja.getDonadorID(), EstadoDonadorEnum.BANEADO);
     }
 
-    @Override
-    @Transactional
-    public DonadorDTO buscarDonadorPorID(String donadorID) throws NoSuchElementException {
-        val donadorOptional = this.donadoresRepository.findById(donadorID);
-        if (donadorOptional.isEmpty()) {
-            throw new DonadorNoEncontradoException("Donador no encontrado");
-        }
-        val donadorFinal = donadorOptional.get();
-        return donadoresYEntidadesDataMapper.toDonadorDTO(donadorFinal);
+    val res = quejaDataMapper.toQuejaDTO(guardada);
+    if (eventPublisher != null) {
+      eventPublisher.publishQuejaRegistrada(res);
+    }
+    return res;
+  }
 
+  // MODIFICAR DONADOR
+  @Override
+  @Transactional
+  public DonadorDTO modificarEstado(String donadorID, EstadoDonadorEnum estado)
+      throws NoSuchElementException {
+    if (estado == null) {
+      throw new RuntimeException("El estado no puede ser nulo");
+    }
+    val donador = this.donadoresRepository.findById(donadorID);
+    if (donador.isEmpty()) {
+      throw new NoSuchElementException("No existe un donador con ese ID");
+    }
+    donador.get().setEstado(estado);
+    this.donadoresRepository.save(donador.get());
+    if (eventPublisher != null) {
+      eventPublisher.publishDonadorEstadoModificado(donadorID, estado);
+    }
+    return donadoresYEntidadesDataMapper.toDonadorDTO(donador.get());
+  }
+
+  // MODIFICAR DONADOR
+  @Override
+  @Transactional
+  public DonadorDTO modifcarCategoria(String donadorID, String categoria)
+      throws NoSuchElementException {
+    if (categoria == null) {
+      throw new RuntimeException("La categoria no puede ser nula");
+    }
+    val donador = this.donadoresRepository.findById(donadorID);
+    if (donador.isEmpty()) {
+      throw new NoSuchElementException("No existe un donador con ese ID");
+    }
+    donador.get().setCategoria(categoria);
+    this.donadoresRepository.save(donador.get());
+    if (eventPublisher != null) {
+      eventPublisher.publishDonadorCategoriaModificada(donadorID, categoria);
+    }
+    return donadoresYEntidadesDataMapper.toDonadorDTO(donador.get());
+  }
+
+  @Override
+  @Transactional
+  public DonadorDTO buscarDonadorPorID(String donadorID) throws NoSuchElementException {
+    val donadorOptional = this.donadoresRepository.findById(donadorID);
+    if (donadorOptional.isEmpty()) {
+      throw new DonadorNoEncontradoException("Donador no encontrado");
+    }
+    val donadorFinal = donadorOptional.get();
+    return donadoresYEntidadesDataMapper.toDonadorDTO(donadorFinal);
+  }
+
+  @Override
+  @Transactional
+  public Boolean puedeDonar(String donadorID) throws NoSuchElementException {
+    if (donadorID == null) {
+      throw new RuntimeException("No puede donar");
+    }
+    if (buscarDonadorPorID(donadorID).estado() == EstadoDonadorEnum.SOSPECHOSO) {
+      return Math.random() <= 0.5;
+    }
+    return buscarDonadorPorID(donadorID).estado() == EstadoDonadorEnum.VERIFICADO;
+  }
+
+  @Override
+  @Transactional
+  public List<QuejaDTO> obtenerQuejasDe(String donadorID) throws NoSuchElementException {
+    if (donadorID == null) {
+      throw new NoSuchElementException("El parametro no puede ser nulo");
+    }
+    buscarDonadorPorID(donadorID);
+    return quejasRepository.quejasDeUnDonador(donadorID).stream()
+        .map(x -> quejaDataMapper.toQuejaDTO(x))
+        .toList();
+  }
+
+  // ALTA ENTIDAD
+  @Override
+  @Transactional
+  public EntidadBeneficaDTO agregarEntidad(EntidadBeneficaDTO entidadBeneficaDTO) {
+    if (entidadBeneficaDTO == null) {
+      throw new RuntimeException("La entidad no puede ser nula");
+    }
+    if (this.entidadesBeneficasRepository.findById(entidadBeneficaDTO.id()).isPresent()) {
+      throw new DonadorYaExistenteException("Ya existe un entidad benefica con ese ID");
+    }
+    val entidadBenefica = donadoresYEntidadesDataMapper.toEntidadBenefica(entidadBeneficaDTO);
+    val entidadGuardada = this.entidadesBeneficasRepository.save(entidadBenefica);
+    val res = donadoresYEntidadesDataMapper.toEntidadBeneficaDTO(entidadGuardada);
+    if (eventPublisher != null) {
+      eventPublisher.publishEntidadCreada(res);
+    }
+    return res;
+  }
+
+  // BAJA ENTIDAD
+  @Transactional
+  public EntidadBeneficaDTO quitarEntidad(String entidadID) {
+    if (entidadID == null) {
+      throw new RuntimeException("La entidadID no puede ser nula");
+    }
+    if (entidadesBeneficasRepository.findById(entidadID).isEmpty()) {
+      throw new EntidadBeneficaNoEncontradaException("No existe una entidad benefica con ese ID");
+    }
+    val entidadBajada = entidadesBeneficasRepository.deleteById(entidadID);
+    if (eventPublisher != null) {
+      eventPublisher.publishEntidadEliminada(entidadID);
+    }
+    return donadoresYEntidadesDataMapper.toEntidadBeneficaDTO(entidadBajada);
+  }
+
+  // MODIFICAR ENTIDAD
+  @Transactional
+  public EntidadBeneficaDTO modificarRazonSocial(String entidadID, String nuevaRazon) {
+    if (entidadID == null) {
+      throw new RuntimeException("El parametro entidadID no puede ser nulo");
+    }
+    val entidad = entidadesBeneficasRepository.findById(entidadID);
+    entidad.get().setRazonSocial(nuevaRazon);
+    this.entidadesBeneficasRepository.save(entidad.get());
+    if (eventPublisher != null) {
+      eventPublisher.publishEntidadRazonModificada(entidadID, nuevaRazon);
+    }
+    return donadoresYEntidadesDataMapper.toEntidadBeneficaDTO(entidad.get());
+  }
+
+  @Override
+  @Transactional
+  public EntidadBeneficaDTO buscarEntidadPorID(String entidadID) throws NoSuchElementException {
+    val entidadOptional = this.entidadesBeneficasRepository.findById(entidadID);
+    if (entidadOptional.isEmpty()) {
+      throw new DonadorNoEncontradoException("Entidad no encontrada");
+    }
+    val entidadFinal = entidadOptional.get();
+    return donadoresYEntidadesDataMapper.toEntidadBeneficaDTO(entidadFinal);
+  }
+
+  // ALTA NECESIDAD MATERIAL
+  @Override
+  @Transactional
+  public NecesidadMaterialDTO registrarNecesidad(NecesidadMaterialDTO necesidadMaterialDTO) {
+    if (necesidadMaterialDTO == null) {
+      throw new RuntimeException("La necesidad no puede ser nula");
+    }
+    if (necesidadMaterialDTO.cantidadObjetivo() == null
+        || necesidadMaterialDTO.cantidadObjetivo() <= 0) {
+      throw new RuntimeException("La cantidad objetivo no puede ser nula o negativa");
+    }
+    if (necesidadMaterialRepository.findById(necesidadMaterialDTO.id()).isPresent()) {
+      throw new RuntimeException("La necesidad ya existe");
+    }
+    buscarEntidadPorID(necesidadMaterialDTO.entidadID());
+
+    if (donacionesClient != null) {
+      donacionesClient.getProducto(necesidadMaterialDTO.productoSolicitadoID());
     }
 
-    @Override
-    @Transactional
-    public Boolean puedeDonar(String donadorID) throws NoSuchElementException {
-        if (donadorID == null) {
-            throw new RuntimeException("No puede donar");
+    val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
+    val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
+
+    if (logisticaClient != null) {
+      val stock = logisticaClient.stockDisponible(necesidadMaterialDTO.productoSolicitadoID());
+      if (stock != null && stock.cantidadDisponible() != null) {
+        if (stock.cantidadDisponible() >= necesidadMaterialDTO.cantidadObjetivo()) {
+          logisticaClient.asignar(
+              necesidadMaterialDTO.productoSolicitadoID(),
+              necesidadMaterialGuardada.getId(),
+              necesidadMaterialDTO.cantidadObjetivo());
+        } else {
+          logisticaClient.asignar(
+              necesidadMaterialDTO.productoSolicitadoID(),
+              necesidadMaterialGuardada.getId(),
+              stock.cantidadDisponible());
         }
-        if (buscarDonadorPorID(donadorID).estado() == EstadoDonadorEnum.SOSPECHOSO){
-            return Math.random() <= 0.5;
-        }
-        return buscarDonadorPorID(donadorID).estado() == EstadoDonadorEnum.VERIFICADO;
+      }
+    }
+    val res = necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidadMaterialGuardada);
+    if (eventPublisher != null) {
+      eventPublisher.publishNecesidadRegistrada(res);
+    }
+    return res;
+  }
+
+  // BAJA NECESIDAD MATERIAL
+  @Transactional
+  public NecesidadMaterialDTO quitarNecesidad(String necesidadID) {
+    if (necesidadID == null) {
+      throw new RuntimeException("La necesidadID no puede ser nula");
+    }
+    if (necesidadMaterialRepository.findById(necesidadID).isEmpty()) {
+      throw new NoSuchElementException("La necesidad no existe");
+    }
+    val necesidadBorrada = necesidadMaterialRepository.deleteById(necesidadID);
+    if (eventPublisher != null) {
+      eventPublisher.publishNecesidadEliminada(necesidadID);
+    }
+    return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidadBorrada);
+  }
+
+  @Transactional
+  public NecesidadMaterialDTO buscarNecesidad(String necesidadID) {
+    val necesidad = necesidadMaterialRepository.findById(necesidadID);
+    if (necesidad.isEmpty()) {
+      throw new NoSuchElementException("La necesidad no existe");
+    }
+    return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad.get());
+  }
+
+  public List<NecesidadMaterialDTO> obtenerTodasLasNecesidades() {
+    return necesidadMaterialRepository.todasNecesidades().stream()
+        .map(x -> necesidadMaterialDataMapper.toNecesidadMaterialDTO(x))
+        .toList();
+  }
+
+  // MODIFICAR NECESIDAD
+  @Override
+  @Transactional
+  public NecesidadMaterialDTO satisfacerNecesidad(String necesidadID, Integer cantidad)
+      throws NoSuchElementException {
+    if (cantidad == null || cantidad <= 0) {
+      throw new RuntimeException("La cantidad debe ser mayor a cero");
     }
 
-    @Override
-    @Transactional
-    public List<QuejaDTO> obtenerQuejasDe(String donadorID) throws NoSuchElementException {
-        if (donadorID == null){
-            throw new NoSuchElementException("El parametro no puede ser nulo");
-        }
-        buscarDonadorPorID(donadorID);
-        return quejasRepository.quejasDeUnDonador(donadorID).stream().map(x -> quejaDataMapper.toQuejaDTO(x)).toList();
+    val necesidadOpt = necesidadMaterialRepository.findById(necesidadID);
+    if (necesidadOpt.isEmpty()) {
+      throw new NoSuchElementException("La necesidad no existe");
     }
-
-    //ALTA ENTIDAD
-    @Override
-    @Transactional
-    public EntidadBeneficaDTO agregarEntidad(EntidadBeneficaDTO entidadBeneficaDTO) {
-        if (entidadBeneficaDTO == null) {
-            throw new RuntimeException("La entidad no puede ser nula");
-        }
-        if (this.entidadesBeneficasRepository.findById(entidadBeneficaDTO.id()).isPresent()) {
-            throw new DonadorYaExistenteException("Ya existe un entidad benefica con ese ID");
-        }
-        val entidadBenefica = donadoresYEntidadesDataMapper.toEntidadBenefica(entidadBeneficaDTO);
-        val entidadGuardada = this.entidadesBeneficasRepository.save(entidadBenefica);
-        return donadoresYEntidadesDataMapper.toEntidadBeneficaDTO(entidadGuardada);
+    val necesidad = necesidadOpt.get();
+    if (necesidad.getTipo().equals(TipoNecesidadMaterialEnum.RECURRENTE)) {
+      if (cantidad < necesidad.getCantidadObjetivo()) {
+        throw new IllegalArgumentException(
+            "No se puede safisfacer una necesidad RECURRENTE de forma parcial");
+      } else {
+        necesidad.setCantidadObjetivo(0);
+        necesidadMaterialRepository.save(necesidad);
+      }
+    } else if (necesidad.getTipo().equals(TipoNecesidadMaterialEnum.EXTRAORDINARIA)) {
+      int nuevaCantidad = necesidad.getCantidadObjetivo() - cantidad;
+      if (nuevaCantidad <= 0) {
+        necesidad.setCantidadObjetivo(0);
+        necesidadMaterialRepository.save(necesidad);
+      } else {
+        necesidad.setCantidadObjetivo(nuevaCantidad);
+        this.necesidadMaterialRepository.save(necesidad);
+      }
     }
-
-    //BAJA ENTIDAD
-    @Transactional
-    public EntidadBeneficaDTO quitarEntidad(String entidadID){
-        if (entidadID == null) {
-            throw new RuntimeException("La entidadID no puede ser nula");
-        }
-        if(entidadesBeneficasRepository.findById(entidadID).isEmpty()){
-            throw new EntidadBeneficaNoEncontradaException("No existe una entidad benefica con ese ID");
-        }
-
-        val entidadBajada = entidadesBeneficasRepository.deleteById(entidadID);
-
-        return donadoresYEntidadesDataMapper.toEntidadBeneficaDTO(entidadBajada);
+    val res = necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad);
+    if (eventPublisher != null) {
+      eventPublisher.publishNecesidadSatisfecha(
+          necesidadID, cantidad, necesidad.getCantidadObjetivo());
     }
+    return res;
+  }
 
-    //MODIFICAR ENTIDAD
-    @Transactional
-    public EntidadBeneficaDTO modificarRazonSocial(String entidadID, String nuevaRazon){
-        if(entidadID == null){
-            throw new RuntimeException("El parametro entidadID no puede ser nulo");
-        }
-        val entidad = entidadesBeneficasRepository.findById(entidadID);
-        entidad.get().setRazonSocial(nuevaRazon);
-        this.entidadesBeneficasRepository.save(entidad.get());
-        return donadoresYEntidadesDataMapper.toEntidadBeneficaDTO(entidad.get());
+  @Transactional
+  public NecesidadMaterialDTO modificarNecesidad(String necesidadID, Integer cantidadObjetivo) {
+    val necesidad = this.necesidadMaterialRepository.findById(necesidadID);
+    necesidad.get().setCantidadObjetivo(cantidadObjetivo);
+    val res = necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad.get());
+    if (eventPublisher != null) {
+      eventPublisher.publishNecesidadModificada(necesidadID, cantidadObjetivo);
     }
+    return res;
+  }
 
+  @Override
+  @Transactional
+  public List<NecesidadMaterialDTO> obtenerNecesidadesInsatisfechasDe(String productoSolicitadoID) {
+    return necesidadMaterialRepository.todasLasNecesidades(productoSolicitadoID).stream()
+        .map(x -> necesidadMaterialDataMapper.toNecesidadMaterialDTO(x))
+        .toList();
+  }
 
-    @Override
-    @Transactional
-    public EntidadBeneficaDTO buscarEntidadPorID(String entidadID) throws NoSuchElementException {
-        val entidadOptional = this.entidadesBeneficasRepository.findById(entidadID);
-
-        if (entidadOptional.isEmpty()) {
-            throw new DonadorNoEncontradoException("Entidad no encontrada");
-        }
-        val entidadFinal = entidadOptional.get();
-
-        return donadoresYEntidadesDataMapper.toEntidadBeneficaDTO(entidadFinal);
-    }
-
-    //ALTA NECESIDAD MATERIAL
-    @Override
-    @Transactional
-    public NecesidadMaterialDTO registrarNecesidad(NecesidadMaterialDTO necesidadMaterialDTO) {
-        if (necesidadMaterialDTO == null) {
-            throw new RuntimeException("La necesidad no puede ser nula");
-        }
-        if (necesidadMaterialDTO.cantidadObjetivo() == null || necesidadMaterialDTO.cantidadObjetivo() <= 0) {
-            throw new RuntimeException("La cantidad objetivo no puede ser nula o negativa");
-        }
-        if (necesidadMaterialRepository.findById(necesidadMaterialDTO.id()).isPresent()) {
-            throw new RuntimeException("La necesidad ya existe");
-        }
-        buscarEntidadPorID(necesidadMaterialDTO.entidadID());
-
-        donacionesClient.getProducto(necesidadMaterialDTO.productoSolicitadoID());
-
-        val stock = logisticaClient.stockDisponible(necesidadMaterialDTO.productoSolicitadoID());
-
-        val necesidadMaterial = necesidadMaterialDataMapper.toNecesidadMaterial(necesidadMaterialDTO);
-        val necesidadMaterialGuardada = this.necesidadMaterialRepository.save(necesidadMaterial);
-
-        if(stock.cantidadDisponible() >= necesidadMaterialDTO.cantidadObjetivo()){
-            logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialGuardada.getId(), necesidadMaterialDTO.cantidadObjetivo());
-        }
-        else {
-            logisticaClient.asignar(necesidadMaterialDTO.productoSolicitadoID(), necesidadMaterialGuardada.getId(), stock.cantidadDisponible());
-            }
-        return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidadMaterialGuardada);
-    }
-
-    //BAJA NECESIDAD MATERIAL
-    @Transactional
-    public NecesidadMaterialDTO quitarNecesidad(String necesidadID){
-        if(necesidadID == null){
-            throw new RuntimeException("La necesidadID no puede ser nula");
-        }
-        if (necesidadMaterialRepository.findById(necesidadID).isEmpty()) {
-            throw new NoSuchElementException("La necesidad no existe");
-        }
-        val necesidadBorrada = necesidadMaterialRepository.deleteById(necesidadID);
-        return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidadBorrada);
-    }
-
-    @Transactional
-    public NecesidadMaterialDTO buscarNecesidad (String necesidadID){
-        val necesidad = necesidadMaterialRepository.findById(necesidadID);
-        if(necesidad.isEmpty()){
-            throw new NoSuchElementException("La necesidad no existe");
-        }
-        return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad.get());
-    }
-
-    public List<NecesidadMaterialDTO> obtenerTodasLasNecesidades(){
-        return necesidadMaterialRepository.todasNecesidades().
-                stream().map(x->necesidadMaterialDataMapper.toNecesidadMaterialDTO(x)).toList();
-    }
-
-    //MODIFICAR NECESIDAD
-    @Override
-    @Transactional
-    public NecesidadMaterialDTO satisfacerNecesidad(String necesidadID, Integer cantidad) throws NoSuchElementException {
-        if (cantidad == null || cantidad <= 0) {
-            throw new RuntimeException("La cantidad debe ser mayor a cero");
-        }
-
-        val necesidadOpt = necesidadMaterialRepository.findById(necesidadID);
-        if (necesidadOpt.isEmpty()) {
-            throw new NoSuchElementException("La necesidad no existe");
-        }
-        val necesidad = necesidadOpt.get();
-        if (necesidad.getTipo().equals(TipoNecesidadMaterialEnum.RECURRENTE)) {
-            if (cantidad < necesidad.getCantidadObjetivo()) {
-                throw new IllegalArgumentException("No se puede safisfacer una necesidad RECURRENTE de forma parcial");
-            } else {
-                necesidad.setCantidadObjetivo(0);
-                necesidadMaterialRepository.save(necesidad);
-            }
-        }
-        else if (necesidad.getTipo().equals(TipoNecesidadMaterialEnum.EXTRAORDINARIA)) {
-            int nuevaCantidad = necesidad.getCantidadObjetivo() - cantidad;
-            if (nuevaCantidad <= 0) {
-                necesidad.setCantidadObjetivo(0);
-                necesidadMaterialRepository.save(necesidad);
-            } else {
-                necesidad.setCantidadObjetivo(nuevaCantidad);
-                this.necesidadMaterialRepository.save(necesidad);
-            }
-        }
-        return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad);
-    }
-
-    @Transactional
-    public NecesidadMaterialDTO modificarNecesidad(String necesidadID, Integer cantidadObjetivo){
-        val necesidad = this.necesidadMaterialRepository.findById(necesidadID);
-        necesidad.get().setCantidadObjetivo(cantidadObjetivo);
-        return necesidadMaterialDataMapper.toNecesidadMaterialDTO(necesidad.get());
-    }
-
-    @Override
-    @Transactional
-    public List<NecesidadMaterialDTO> obtenerNecesidadesInsatisfechasDe(String productoSolicitadoID) {
-        return necesidadMaterialRepository
-                .todasLasNecesidades(productoSolicitadoID)
-                .stream().map(x-> necesidadMaterialDataMapper.toNecesidadMaterialDTO(x))
-                .toList();
-    }
-
-    @Override
-    @Transactional
-    public DonadorStatsDTO estadisticasDonador(String donadorID) throws NoSuchElementException {
-
+  @Override
+  @Transactional
+  public DonadorStatsDTO estadisticasDonador(String donadorID) throws NoSuchElementException {
     val donador = buscarDonadorPorID(donadorID);
 
     List<String> insigniasIds = List.of();
     String misionId = null;
 
-    if (this.incentivosClient != null) {
-        val insignias = this.incentivosClient.getInsigniasDeDonador(donadorID);
+    if (this.fachadaIncentivos != null) {
+      val insignias = this.fachadaIncentivos.getInsigniasDeDonador(donadorID);
+      if (insignias != null) {
         insigniasIds = insignias.stream().map(i -> i.id()).toList();
-
-        val mision = this.incentivosClient.getMisionEnCursoDeDonador(donadorID);
-        if (mision != null) {
-            misionId = mision.id();
-        }
+      }
+      val mision = this.fachadaIncentivos.getMisionEnCursoDeDonador(donadorID);
+      if (mision != null) {
+        misionId = mision.id();
+      }
+    } else if (this.incentivosClient != null) {
+      val insignias = this.incentivosClient.getInsigniasDeDonador(donadorID);
+      if (insignias != null) {
+        insigniasIds = insignias.stream().map(i -> i.id()).toList();
+      }
+      val mision = this.incentivosClient.getMisionEnCursoDeDonador(donadorID);
+      if (mision != null) {
+        misionId = mision.id();
+      }
     }
     return new DonadorStatsDTO(
-            donador.id(),
-            donador.nombre(),
-            donador.apellido(),
-            donador.edad(),
-            donador.estado(),
-            donador.categoria(),
-            misionId,
-            insigniasIds
-    );
-}
-    @Override
-    @Transactional
-    public void setFachadaIncentivos(FachadaIncentivos fachadaIncentivos) {
-        this.fachadaIncentivos = fachadaIncentivos;
-    }
+        donador.id(),
+        donador.nombre(),
+        donador.apellido(),
+        donador.edad(),
+        donador.estado(),
+        donador.categoria(),
+        misionId,
+        insigniasIds);
+  }
 
-    @Transactional
-    public void quitarTodosLosDonadores() {
-        this.donadoresRepository.deleteAll();
-    }
+  @Override
+  @Transactional
+  public void setFachadaIncentivos(FachadaIncentivos fachadaIncentivos) {
+    this.fachadaIncentivos = fachadaIncentivos;
+  }
 
-    @Transactional
-    public void quitarTodasLasEntidades() {
-        this.entidadesBeneficasRepository.deleteAll();
+  @Transactional
+  public void quitarTodosLosDonadores() {
+    this.donadoresRepository.deleteAll();
+    if (eventPublisher != null) {
+      eventPublisher.publishDonadoresTodosEliminados();
     }
+  }
+
+  @Transactional
+  public void quitarTodasLasEntidades() {
+    this.entidadesBeneficasRepository.deleteAll();
+    if (eventPublisher != null) {
+      eventPublisher.publishEntidadesTodasEliminadas();
+    }
+  }
 }

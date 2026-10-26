@@ -1,9 +1,7 @@
 package ar.edu.utn.dds.k3003.repositories.InMemory;
 
-
 import ar.edu.utn.dds.k3003.model.Queja;
 import ar.edu.utn.dds.k3003.repositories.QuejasRepository;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -12,30 +10,29 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class InMemoryQuejasRepo implements QuejasRepository {
 
-    private List<Queja> quejas;
+  private List<Queja> quejas;
 
-    private AtomicLong idSecuencial = new AtomicLong(1);
+  private AtomicLong idSecuencial = new AtomicLong(1);
 
-    public InMemoryQuejasRepo() {
-        this.quejas = new ArrayList<>();
-    }
+  public InMemoryQuejasRepo() {
+    this.quejas = new ArrayList<>();
+  }
 
-    @Override
-    public Queja save(Queja queja) {
-        queja.setId(String.valueOf(idSecuencial.getAndIncrement()));
+  @Override
+  public Queja save(Queja queja) {
+    queja.setId(String.valueOf(idSecuencial.getAndIncrement()));
 
-        this.quejas.add(queja);
-        return this.findById(queja.getId()).get();
-}
+    this.quejas.add(queja);
+    return this.findById(queja.getId()).get();
+  }
 
-    @Override
-    public Optional<Queja> findById(String id) {
-        return this.quejas.stream().filter(d -> Objects.equals(d.getId(), id)).findFirst();
-    }
+  @Override
+  public Optional<Queja> findById(String id) {
+    return this.quejas.stream().filter(d -> Objects.equals(d.getId(), id)).findFirst();
+  }
 
-    @Override
-    public List<Queja> quejasDeUnDonador(String donadorId) {
-        return this.quejas.stream().filter(d -> Objects.equals(d.getDonadorID(), donadorId)).toList();
-    }
-
+  @Override
+  public List<Queja> quejasDeUnDonador(String donadorId) {
+    return this.quejas.stream().filter(d -> Objects.equals(d.getDonadorID(), donadorId)).toList();
+  }
 }

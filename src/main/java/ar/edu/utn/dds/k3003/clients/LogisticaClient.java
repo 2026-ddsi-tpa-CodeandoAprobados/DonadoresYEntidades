@@ -11,30 +11,34 @@ import org.springframework.web.client.RestClient;
 
 @Service
 public class LogisticaClient {
-    private RestClient restClient;
+  private RestClient restClient;
 
-    public LogisticaClient(@Value("${LOGISTICA_API_URL}") String baseUrl) {
-        this.restClient = RestClient.builder()
-                .requestInterceptor(new TrazaRestClientInterceptor())
-                .baseUrl(baseUrl)
-                .build();
-    }
+  public LogisticaClient(@Value("${LOGISTICA_API_URL}") String baseUrl) {
+    this.restClient =
+        RestClient.builder()
+            .requestInterceptor(new TrazaRestClientInterceptor())
+            .baseUrl(baseUrl)
+            .build();
+  }
 
-    public StockDisponibleDTO stockDisponible(String productoID){
-            return restClient.get()
-                    .uri("/stock/{productoID}", productoID)
-                    .retrieve()
-                    .body(StockDisponibleDTO.class);
-    }
+  public StockDisponibleDTO stockDisponible(String productoID) {
+    return restClient
+        .get()
+        .uri("/stock/{productoID}", productoID)
+        .retrieve()
+        .body(StockDisponibleDTO.class);
+  }
 
-    public void asignar(String productoID, String necesidadID,Integer cantidadObjetivo){
-        AsignacionNecesidadDTO asignacionNecesidadDTO = new AsignacionNecesidadDTO(necesidadID, cantidadObjetivo, OrigenAsignacionEnum.SOLICITUD_DONADORES);
-        restClient.post()
-                .uri("/stock/{productoID}/asignaciones", productoID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(asignacionNecesidadDTO)
-                .retrieve()
-                .toBodilessEntity();
-    }
-
+  public void asignar(String productoID, String necesidadID, Integer cantidadObjetivo) {
+    AsignacionNecesidadDTO asignacionNecesidadDTO =
+        new AsignacionNecesidadDTO(
+            necesidadID, cantidadObjetivo, OrigenAsignacionEnum.SOLICITUD_DONADORES);
+    restClient
+        .post()
+        .uri("/stock/{productoID}/asignaciones", productoID)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(asignacionNecesidadDTO)
+        .retrieve()
+        .toBodilessEntity();
+  }
 }

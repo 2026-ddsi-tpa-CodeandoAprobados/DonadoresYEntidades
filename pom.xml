@@ -63,6 +63,12 @@
       <version>42.7.3</version>
     </dependency>
 
+    <!-- RabbitMQ (Cola de mensajeria) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-amqp</artifactId>
+    </dependency>
+
     <!-- DataDog -->
     <dependency>
       <groupId>io.micrometer</groupId>
@@ -200,6 +206,7 @@
             <exclude>ar/edu/utn/dds/k3003/Application.class</exclude>
             <exclude>ar/edu/utn/dds/k3003/config/**</exclude>
             <exclude>ar/edu/utn/dds/k3003/exceptions/**</exclude>
+            <exclude>ar/edu/utn/dds/k3003/messaging/**</exclude>
           </excludes>
         </configuration>
         <executions>
